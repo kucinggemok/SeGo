@@ -14,7 +14,6 @@
         .booking-card { border-left-color: var(--amber); background: rgba(245, 158, 11, 0.05); border: 1px solid var(--amber); }
         .btn { width: 100%; padding: 12px; background: var(--blue); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.2s; }
         .btn:active { transform: scale(0.98); }
-        
         #chatBox { background: rgba(15, 23, 42, 0.8); border-radius: 10px; height: 180px; overflow-y: auto; padding: 10px; margin: 15px 0; border: 1px solid #334155; display: flex; flex-direction: column; gap: 8px; }
         .msg { padding: 8px 12px; border-radius: 12px; max-width: 80%; font-size: 0.9rem; }
         .msg.me { align-self: flex-end; background: var(--blue); color: white; border-bottom-right-radius: 2px; }
@@ -31,85 +30,12 @@
     </div>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyCU3QzjiDpL4U3825XtERth6PFlJ1tsZtg",
-            databaseURL: "https://carpool-uitm-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "carpool-uitm"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+        /* OBFUSCATED JAVASCRIPT START */
+        const _0x538d=['on','value','getItem','status','BOOKED','find','name','car','plate','chatBox','chatInput','innerHTML','booked_driver_id','drivers/','update','chats/','push','student'];(function(_0x1b4c4d,_0x538d6b){const _0x4d528b=function(_0x26955a){while(--_0x26955a){_0x1b4c4d['push'](_0x1b4c4d['shift']());}};_0x4d528b(++_0x538d6b);}(_0x538d,0x1b3));const _0x4d52=function(_0x1b4c4d,_0x538d6b){_0x1b4c4d=_0x1b4c4d-0x0;let _0x4d528b=_0x538d[_0x1b4c4d];return _0x4d528b;};const firebaseConfig={'apiKey':'AIzaSyCU3QzjiDpL4U3825XtERth6PFlJ1tsZtg','databaseURL':'https://carpool-uitm-default-rtdb.asia-southeast1.firebasedatabase.app','projectId':'carpool-uitm'};firebase['initializeApp'](firebaseConfig);const db=firebase['database']();db['ref']('drivers')[_0x4d52('0x0')](_0x4d52('0x1'),_0x1e3f0d=>{const _0x524823=_0x1e3f0d['val']();let _0x48529f=localStorage[_0x4d52('0x2')](_0x4d52('0xc'));let _0x2729b5='';if(_0x524823){const _0x1c8828=Object['values'](_0x524823);const _0x3e176c=_0x1c8828[_0x4d52('0x5')](_0x298412=>_0x298412['id']===_0x48529f&&_0x298412[_0x4d52('0x3')]===_0x4d52('0x4'));if(_0x3e176c){_0x2729b5='<div class="card booking-card"><h2 style="color:var(--amber);margin-top:0;">Ongoing Trip</h2><p style="margin:0;">Driver: <b>'+_0x3e176c[_0x4d52('0x6')]+'</b></p><p style="color:var(--slate);font-size:0.9rem;">'+_0x3e176c[_0x4d52('0x7')]+' • '+_0x3e176c[_0x4d52('0x8')]+'</p><div id="chatBox"></div><div class="chat-area"><input type="text" id="chatInput" placeholder="Reply to driver..."><button onclick="sendChat(\''+_0x3e176c['id']+'\')" style="background:var(--blue);border:none;padding:10px 15px;border-radius:8px;color:white;">Send</button></div><p style="font-size:0.8rem;color:var(--slate);margin-top:15px;text-align:center;">Driver will end the trip once you arrive.</p></div>';loadChats(_0x3e176c['id']);}else{localStorage['removeItem'](_0x4d52('0xc'));const _0x482103=_0x1c8828['filter'](_0x392812=>_0x392812['status']==='ON');if(_0x482103['length']>0x0){_0x482103['forEach'](_0x129382=>{_0x2729b5+='<div class="card"><h3 style="margin-top:0;">'+_0x129382[_0x4d52('0x6')]+'</h3><p style="color:var(--slate);">'+_0x129382[_0x4d52('0x7')]+' ['+_0x129382[_0x4d52('0x8')]+']</p><button class="btn" onclick="book(\''+_0x129382['id']+'\')">BOOK NOW</button></div>';});}else{_0x2729b5='<p style="text-align:center;color:var(--slate);">No drivers online right now.</p>';}}}document['getElementById']('list')[_0x4d52('0xb')]=_0x2729b5;});async function book(_0x1a2938){if(!confirm('Book this driver?'))return;localStorage['setItem'](_0x4d52('0xc'),_0x1a2938);await db['ref'](_0x4d52('0xd')+_0x1a2938)[_0x4d52('0xe')]({'status':_0x4d52('0x4')});}async function sendChat(_0x129381){const _0x482912=document['getElementById'](_0x4d52('0xa'));if(!_0x482912['value']['trim']())return;await db['ref'](_0x4d52('0xf')+_0x129381)[_0x4d52('0x10')]({'sender':_0x4d52('0x11'),'text':_0x482912['value'],'time':Date['now']()});_0x482912['value']='';}function loadChats(_0x291823){db['ref'](_0x4d52('0xf')+_0x291823)['on'](_0x4d52('0x1'),_0x192837=>{const _0x582911=document['getElementById'](_0x4d52('0x9'));if(!_0x582911)return;let _0x482103='';_0x192837['forEach'](_0x382911=>{const _0x128391=_0x382911['val']();_0x482103+='<div class="msg '+(_0x128391['sender']===_0x4d52('0x11')?'me':'them')+'">'+_0x128391['text']+'</div>';});_0x582911[_0x4d52('0xb')]=_0x482103;_0x582911['scrollTop']=_0x582911['scrollHeight'];});}
+    </script>
+</body>
+</html>
 
-        db.ref('drivers').on('value', (snapshot) => {
-            const data = snapshot.val();
-            let myBookedId = localStorage.getItem('booked_driver_id');
-            let html = "";
-
-            if (data) {
-                const drivers = Object.values(data);
-                const activeTrip = drivers.find(d => d.id === myBookedId && d.status === 'BOOKED');
-
-                if (activeTrip) {
-                    html = `
-                        <div class="card booking-card">
-                            <h2 style="color:var(--amber); margin-top:0;">Ongoing Trip</h2>
-                            <p style="margin:0;">Driver: <b>${activeTrip.name}</b></p>
-                            <p style="color:var(--slate); font-size:0.9rem;">${activeTrip.car} • ${activeTrip.plate}</p>
-                            
-                            <div id="chatBox"></div>
-                            
-                            <div class="chat-area">
-                                <input type="text" id="chatInput" placeholder="Reply to driver...">
-                                <button onclick="sendChat('${activeTrip.id}')" style="background:var(--blue); border:none; padding:10px 15px; border-radius:8px; color:white;">Send</button>
-                            </div>
-                            
-                            <p style="font-size:0.8rem; color:var(--slate); margin-top:15px; text-align:center;">Driver will end the trip once you arrive.</p>
-                        </div>`;
-                    loadChats(activeTrip.id);
-                } else {
-                    localStorage.removeItem('booked_driver_id');
-                    const online = drivers.filter(d => d.status === 'ON');
-                    if(online.length > 0) {
-                        online.forEach(d => {
-                            html += `
-                                <div class="card">
-                                    <h3 style="margin-top:0;">${d.name}</h3>
-                                    <p style="color:var(--slate);">${d.car} [${d.plate}]</p>
-                                    <button class="btn" onclick="book('${d.id}')">BOOK NOW</button>
-                                </div>`;
-                        });
-                    } else {
-                        html = "<p style='text-align:center; color:var(--slate);'>No drivers online right now.</p>";
-                    }
-                }
-            }
-            document.getElementById('list').innerHTML = html;
-        });
-
-        async function book(id) {
-            if(!confirm("Book this driver?")) return;
-            localStorage.setItem('booked_driver_id', id);
-            await db.ref('drivers/' + id).update({ status: 'BOOKED' });
-        }
-
-        async function sendChat(driverId) {
-            const input = document.getElementById('chatInput');
-            if(!input.value.trim()) return;
-            await db.ref('chats/' + driverId).push({ sender: 'student', text: input.value, time: Date.now() });
-            input.value = "";
-        }
-
-        function loadChats(driverId) {
-            db.ref('chats/' + driverId).on('value', (snap) => {
-                const box = document.getElementById('chatBox');
-                if(!box) return;
-                let chatHtml = "";
-                snap.forEach(child => {
-                    const m = child.val();
-                    chatHtml += `<div class="msg ${m.sender === 'student' ? 'me' : 'them'}">${m.text}</div>`;
-                });
-                box.innerHTML = chatHtml;
-                box.scrollTop = box.scrollHeight;
-            });
         }
     </script>
 </body>
