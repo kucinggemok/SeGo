@@ -39,15 +39,13 @@
 
         /* Driver Info Style */
         .info-row { display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid #334155; padding-bottom: 8px; text-align: left; font-size: 0.95rem; }
-        .wa-btn { display: flex; align-items: center; justify-content: center; background: #25d366; color: white; text-decoration: none; padding: 15px; border-radius: 12px; font-weight: bold; margin-top: 15px; transition: 0.3s; }
-        .wa-btn:hover { background: #128c7e; }
     </style>
 </head>
 <body>
 
     <div class="container">
         <h1 style="text-align: center; margin-bottom: 5px;">🚗 SeGo</h1>
-        <p style="text-align: center; color: var(--slate); margin-bottom: 30px;"></p>
+        <p style="text-align: center; color: var(--slate); margin-bottom: 30px;">Student Portal</p>
         <div id="list">Synchronizing SeGo data...</div>
     </div>
 
@@ -83,7 +81,6 @@
     </div>
 
     <script>
-        // CONFIGURATION
         const firebaseConfig = {
             apiKey: "AIzaSyCU3QzjiDpL4U3825XtERth6PFlJ1tsZtg",
             databaseURL: "https://carpool-uitm-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -95,7 +92,6 @@
         let selectedStars = 0;
         let currentRatingDriverId = "";
 
-        // MAIN REALTIME LISTENER
         db.ref('drivers').on('value', (snapshot) => {
             const data = snapshot.val();
             let myBookedId = localStorage.getItem('booked_driver_id');
@@ -106,7 +102,6 @@
                 const activeTrip = driversArray.find(d => d.id === myBookedId && d.status === 'BOOKED');
 
                 if (activeTrip) {
-                    // Store ID in case trip ends suddenly
                     localStorage.setItem('pending_rating_id', activeTrip.id);
                     html = `
                         <div class="card booking-card">
@@ -123,8 +118,6 @@
                     loadChats(activeTrip.id);
                 } else {
                     localStorage.removeItem('booked_driver_id');
-                    
-                    // Trigger Rating Modal if a trip just ended
                     const lastId = localStorage.getItem('pending_rating_id');
                     if(lastId) {
                         askForRating(lastId);
@@ -152,7 +145,6 @@
             document.getElementById('list').innerHTML = html;
         });
 
-        // ACTIONS
         async function book(id) {
             if(!confirm("Start booking with this driver?")) return;
             localStorage.setItem('booked_driver_id', id);
@@ -180,32 +172,19 @@
             });
         }
 
-        // END TRIP LOGIC (FIXED)
-        async function finishTrip(id) {
-            if(confirm("End trip and clear chat?")) {
-                localStorage.setItem('pending_rating_id', id); // Prepare for rating
-                await db.ref('chats/' + id).remove(); // Clear messages
-                await db.ref('drivers/' + id).update({ status: 'ON' }); // Reset driver status
-                localStorage.removeItem('booked_driver_id'); // Clear student local state
-            }
-        }
-
-        // MODAL LOGIC - DRIVER INFO
+        // DRIVER INFO - Simplified (Name, ID, Rating)
         function showDriverInfo(id) {
             db.ref('drivers/' + id).once('value').then(s => {
                 const d = s.val();
                 document.getElementById('infoBody').innerHTML = `
                     <div class="info-row"><span>Name</span><span style="font-weight:bold">${d.name}</span></div>
+                    <div class="info-row"><span>Student ID</span><span>${d.student_id || 'N/A'}</span></div>
                     <div class="info-row"><span>Rating</span><span>⭐ ${d.rating || 'New'}</span></div>
-                    <div class="info-row"><span>Car Model</span><span>${d.car}</span></div>
-                    <div class="info-row"><span>Plate Number</span><span>${d.plate}</span></div>
-                    <a href="https://wa.me/6${d.phone}" target="_blank" class="wa-btn">Contact via WhatsApp</a>
                 `;
                 document.getElementById('infoModal').style.display = 'flex';
             });
         }
 
-        // MODAL LOGIC - RATING (GOOGLE STYLE)
         function askForRating(id) {
             currentRatingDriverId = id;
             db.ref('drivers/' + id).once('value').then(s => {
@@ -234,6 +213,15 @@
             });
             alert("Review posted successfully!");
             closeModalWithReload('ratingModal');
+        }
+
+        async function finishTrip(id) {
+            if(confirm("End trip and clear chat?")) {
+                localStorage.setItem('pending_rating_id', id);
+                await db.ref('chats/' + id).remove();
+                await db.ref('drivers/' + id).update({ status: 'ON' });
+                localStorage.removeItem('booked_driver_id');
+            }
         }
 
         function closeSimpleModal(mId) {
