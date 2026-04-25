@@ -29,39 +29,41 @@
             border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; 
         }
 
+        /* Pax Selector Styling */
+        .pax-container { display: flex; justify-content: space-around; margin: 15px 0; }
+        .pax-btn {
+            width: 50px; height: 50px; border-radius: 50%; border: 2px solid #334155;
+            background: transparent; color: white; cursor: pointer; font-weight: bold;
+            display: flex; align-items: center; justify-content: center; transition: 0.3s;
+        }
+        .pax-btn.active { background: var(--blue); border-color: var(--blue); transform: scale(1.1); box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
+
         .btn { 
-            width: 100%; padding: 12px; background: var(--blue); color: white; 
-            border: none; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.2s;
+            width: 100%; padding: 14px; background: var(--blue); color: white; 
+            border: none; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 1rem;
         }
 
         .tab-bar { display: flex; gap: 10px; margin-bottom: 20px; }
-        .tab { 
-            flex: 1; padding: 12px; text-align: center; background: #1e293b; 
-            border-radius: 10px; cursor: pointer; font-size: 0.9rem; border: 1px solid #334155; 
-        }
+        .tab { flex: 1; padding: 12px; text-align: center; background: #1e293b; border-radius: 10px; cursor: pointer; }
         .tab.active { background: var(--blue); font-weight: bold; }
 
-        /* Modal / Panel */
-        #chatPanel, #ratingModal, #infoModal {
+        /* Searching Animation */
+        .searching-box { text-align: center; padding: 40px 20px; }
+        .loader {
+            border: 4px solid #334155; border-top: 4px solid var(--blue);
+            border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Modals */
+        #ratingModal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.9); z-index: 3000; display: none; align-items: center; justify-content: center;
         }
-        .modal-box { background: var(--card); width: 85%; padding: 25px; border-radius: 20px; text-align: center; border: 1px solid var(--blue); }
-        
-        #chatPanel { flex-direction: column; background: var(--bg); display: none; }
-        .chat-header { background: var(--blue); padding: 20px; width: 100%; display: flex; align-items: center; box-sizing: border-box; }
-        #chatMessages { flex: 1; padding: 20px; width: 100%; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; box-sizing: border-box; }
-        .bubble { padding: 10px 15px; border-radius: 15px; max-width: 75%; }
-        .bubble.me { align-self: flex-end; background: var(--blue); }
-        .bubble.them { align-self: flex-start; background: #334155; }
+        .modal-box { background: var(--card); width: 85%; padding: 25px; border-radius: 20px; text-align: center; }
 
-        .booking-item { 
-            background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; 
-            margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--slate);
-        }
-        .status-pill { padding: 4px 10px; border-radius: 5px; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; }
-        .pending { background: #475569; }
-        .accepted { background: #22c55e; }
+        #chatPanel { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 4000; display: none; flex-direction: column; }
     </style>
 </head>
 <body>
@@ -78,70 +80,76 @@
 
         <div id="mainApp" style="display: none;">
             <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-                <span>Welcome, <b id="displayStuName"></b></span>
-                <button onclick="logout()" style="background:none; border:none; color:var(--red); cursor:pointer;">Logout</button>
+                <span>Hi, <b id="displayStuName"></b></span>
+                <button onclick="logout()" style="background:none; border:none; color:var(--red);">Logout</button>
             </div>
 
             <div class="tab-bar">
-                <div class="tab active" id="tabInstant" onclick="switchTab('instant')">Instant Ride</div>
+                <div class="tab active" id="tabInstant" onclick="switchTab('instant')">Instant</div>
                 <div class="tab" id="tabBooking" onclick="switchTab('booking')">Pre-Book</div>
             </div>
 
             <div id="instantSection">
-                <div id="driverList">Searching...</div>
+                <div id="requestForm" class="card">
+                    <h4 style="margin:0">Where to?</h4>
+                    <input type="text" id="pickupLoc" class="input-field" placeholder="Current Location (e.g. Kolej Perindu)">
+                    <input type="text" id="dropLoc" class="input-field" placeholder="Destination (e.g. Fakulti Sains)">
+                    
+                    <p style="margin: 15px 0 5px 0; font-size: 0.9rem; color: var(--slate);">How many pax?</p>
+                    <div class="pax-container">
+                        <button class="pax-btn active" onclick="setPax(1, this)">1</button>
+                        <button class="pax-btn" onclick="setPax(2, this)">2</button>
+                        <button class="pax-btn" onclick="setPax(3, this)">3</button>
+                        <button class="pax-btn" onclick="setPax(4, this)">4</button>
+                    </div>
+
+                    <button class="btn" onclick="findDriver()">FIND DRIVER</button>
+                </div>
+
+                <div id="searchingState" class="card searching-box" style="display: none;">
+                    <div class="loader"></div>
+                    <h3>Searching for Driver...</h3>
+                    <p style="color: var(--slate);">Your request has been broadcasted to nearby drivers.</p>
+                    <button class="btn" style="background: var(--red); margin-top: 20px;" onclick="cancelRequest()">CANCEL REQUEST</button>
+                </div>
+
+                <div id="tripActiveState" style="display: none;">
+                    </div>
             </div>
 
             <div id="bookingSection" style="display: none;">
                 <div class="card">
-                    <h4 style="margin-top:0">Schedule Booking</h4>
+                    <h4>Schedule Booking</h4>
                     <input type="date" id="bookDate" class="input-field">
                     <input type="time" id="bookTime" class="input-field">
                     <input type="text" id="bookDest" class="input-field" placeholder="Destination">
                     <button class="btn" style="background:var(--amber); color:black" onclick="submitBooking()">Request Booking</button>
                 </div>
-                <h3>My Bookings</h3>
+                <h3>My Schedule</h3>
                 <div id="myBookingsList"></div>
             </div>
         </div>
     </div>
 
-    <div id="infoModal">
-        <div class="modal-box">
-            <div style="font-size: 3rem;">👤</div>
-            <h2 id="modalName"></h2>
-            <p id="modalID" style="color: var(--slate);"></p>
-            <div style="background: #0f172a; padding: 15px; border-radius: 15px; margin-bottom: 20px;">
-                <div style="font-size: 1.5rem; color:var(--amber);">⭐ <span id="modalRating"></span></div>
-            </div>
-            <button class="btn" style="background:#334155" onclick="closeModal()">Close</button>
-        </div>
-    </div>
-
     <div id="ratingModal">
         <div class="modal-box">
-            <h2>Trip Ended!</h2>
-            <p>Please rate your experience:</p>
-            <select id="rateValue" class="input-field" style="text-align: center; font-size: 1.2rem;">
-                <option value="5">⭐⭐⭐⭐⭐ (5/5)</option>
-                <option value="4">⭐⭐⭐⭐ (4/5)</option>
-                <option value="3">⭐⭐⭐ (3/5)</option>
-                <option value="2">⭐⭐ (2/5)</option>
-                <option value="1">⭐ (1/5)</option>
-            </select>
-            <input type="text" id="rateFeedback" class="input-field" placeholder="Any feedback?">
-            <button class="btn" onclick="submitRating()">Submit Rating</button>
+            <h2>Trip Completed!</h2>
+            <p>Rate your driver:</p>
+            <select id="rateValue" class="input-field"><option value="5">⭐⭐⭐⭐⭐</option><option value="4">⭐⭐⭐⭐</option><option value="3">⭐⭐⭐</option></select>
+            <input type="text" id="rateFeedback" class="input-field" placeholder="Feedback...">
+            <button class="btn" onclick="submitRating()">Submit</button>
         </div>
     </div>
 
     <div id="chatPanel">
-        <div class="chat-header">
-            <button onclick="closeChat()" style="background:none; border:none; color:white; cursor:pointer;">← Back</button>
-            <b id="chatWith" style="margin-left:10px;">Driver</b>
+        <div style="background: var(--blue); padding: 20px; display: flex; align-items: center;">
+            <button onclick="closeChat()" style="background:none; border:none; color:white; font-size:1.2rem;">←</button>
+            <b style="margin-left:15px;" id="chatWith">Driver</b>
         </div>
-        <div id="chatMessages"></div>
-        <div style="padding: 15px; display: flex; gap: 10px; width: 100%; box-sizing: border-box;">
-            <input type="text" id="chatInput" class="input-field" style="margin:0;" placeholder="Message...">
-            <button onclick="sendMsg()" style="background:var(--blue); border:none; color:white; padding:0 15px; border-radius:10px;">Send</button>
+        <div id="chatMessages" style="flex:1; padding:20px; overflow-y:auto; display:flex; flex-direction:column; gap:10px;"></div>
+        <div style="padding:15px; display:flex; gap:10px;">
+            <input type="text" id="chatInput" class="input-field" style="margin:0" placeholder="Type...">
+            <button class="btn" style="width:80px" onclick="sendMsg()">Send</button>
         </div>
     </div>
 
@@ -155,13 +163,13 @@
         const db = firebase.database();
 
         let currentUser = JSON.parse(localStorage.getItem('sego_user'));
-        let activeChatId = null;
+        let selectedPax = 1;
+        let myRequestId = null;
 
-        // AUTH
         function login() {
             const id = document.getElementById('stuID').value.trim();
             const name = document.getElementById('stuName').value.trim();
-            if(!id || !name) return alert("Fill all fields");
+            if(!id || !name) return alert("Fill details");
             currentUser = { id, name };
             localStorage.setItem('sego_user', JSON.stringify(currentUser));
             location.reload();
@@ -172,7 +180,13 @@
             document.getElementById('loginArea').style.display = 'none';
             document.getElementById('mainApp').style.display = 'block';
             document.getElementById('displayStuName').innerText = currentUser.name;
-            syncData();
+            checkActiveRequests();
+        }
+
+        function setPax(num, btn) {
+            selectedPax = num;
+            document.querySelectorAll('.pax-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
         }
 
         function switchTab(t) {
@@ -182,148 +196,90 @@
             document.getElementById('tabBooking').className = t === 'booking' ? 'tab active' : 'tab';
         }
 
-        function syncData() {
-            db.ref('drivers').on('value', snap => {
-                const drivers = snap.val();
-                let html = "";
-                let bookedId = localStorage.getItem('booked_driver_id');
+        // --- NEW OPEN REQUEST LOGIC ---
+        async function findDriver() {
+            const pickup = document.getElementById('pickupLoc').value.trim();
+            const drop = document.getElementById('dropLoc').value.trim();
+            if(!pickup || !drop) return alert("Enter pickup and destination");
 
-                if(drivers) {
-                    const activeTrip = Object.values(drivers).find(d => d && d.id === bookedId);
-                    
-                    // LOGIC: Kalau trip sedang berjalan
-                    if(activeTrip && activeTrip.status === 'BOOKED') {
-                        html = `<div class="card" style="border-left:5px solid var(--amber);">
-                            <h4>Ongoing Ride with ${activeTrip.name}</h4>
-                            <div style="display:flex; flex-direction:column; gap:8px;">
-                                <button class="btn" onclick="openChatBox('${activeTrip.id}', '${activeTrip.name}')">CHAT</button>
-                                <button class="btn" style="background:var(--amber); color:black;" onclick="finishTripManual('${activeTrip.id}')">FINISH TRIP</button>
-                                <button class="btn" style="background:var(--red);" onclick="cancelInstant('${activeTrip.id}')">CANCEL</button>
-                            </div>
-                        </div>`;
-                    } 
-                    // LOGIC: Kalau driver dah tekan "Finish" di side dia
-                    else if (bookedId && (!activeTrip || activeTrip.status === 'ON')) {
-                        // Tunjukkan modal rating secara paksa
-                        localStorage.setItem('pending_rating_id', bookedId);
-                        localStorage.removeItem('booked_driver_id');
-                        document.getElementById('ratingModal').style.display = 'flex';
-                    }
-                    else {
-                        Object.values(drivers).forEach(d => {
-                            if(d && d.name && d.status === "ON") {
-                                html += `<div class="card">
-                                    <b>${d.name}</b><br><small>${d.car} • ${d.plate}</small>
-                                    <div style="display:flex; gap:10px; margin-top:15px;">
-                                        <button class="btn" onclick="bookInstant('${d.id}')">BOOK NOW</button>
-                                        <button class="btn" style="background:#475569" onclick="showInfo('${d.id}')">INFO</button>
-                                    </div>
-                                </div>`;
-                            }
-                        });
-                    }
-                }
-                document.getElementById('driverList').innerHTML = html || "No drivers online.";
-            });
-
-            // Pre-bookings sync (sama macam asal)
-            db.ref('bookings').on('value', snap => {
-                let html = "";
-                snap.forEach(child => {
-                    const b = child.val();
-                    if(b.student_id === currentUser.id) {
-                        html += `<div class="booking-item">
-                            <div><b>${b.date} • ${b.time}</b><br><small>${b.dest}</small></div>
-                            <div class="status-pill ${b.status.toLowerCase()}">${b.status}</div>
-                        </div>`;
-                    }
-                });
-                document.getElementById('myBookingsList').innerHTML = html || "No bookings.";
-            });
-        }
-
-        // FINISH TRIP LOGIC
-        function finishTripManual(id) {
-            if(confirm("End this trip?")) {
-                localStorage.setItem('pending_rating_id', id);
-                db.ref('drivers/' + id).update({ status: 'ON' });
-                db.ref('chats/' + id).remove();
-                localStorage.removeItem('booked_driver_id');
-                document.getElementById('ratingModal').style.display = 'flex';
-            }
-        }
-
-        async function submitRating() {
-            const driverId = localStorage.getItem('pending_rating_id');
-            const rate = document.getElementById('rateValue').value;
-            const feedback = document.getElementById('rateFeedback').value;
+            const newReq = db.ref('open_requests').push();
+            myRequestId = newReq.key;
             
-            if(driverId) {
-                await db.ref('drivers/' + driverId + '/feedbacks').push({
-                    student: currentUser.name,
-                    rating: rate,
-                    comment: feedback,
-                    timestamp: Date.now()
-                });
+            await newReq.set({
+                student_id: currentUser.id,
+                student_name: currentUser.name,
+                pickup: pickup,
+                destination: drop,
+                pax: selectedPax,
+                status: 'SEARCHING',
+                timestamp: Date.now()
+            });
+
+            localStorage.setItem('active_request_id', myRequestId);
+            updateUIState('SEARCHING');
+        }
+
+        function checkActiveRequests() {
+            const reqId = localStorage.getItem('active_request_id');
+            if(!reqId) return;
+
+            db.ref('open_requests/' + reqId).on('value', snap => {
+                const data = snap.val();
+                if(!data) {
+                    updateUIState('IDLE');
+                    return;
+                }
+
+                if(data.status === 'ACCEPTED') {
+                    updateUIState('ACCEPTED', data);
+                } else {
+                    updateUIState('SEARCHING');
+                }
+            });
+        }
+
+        function updateUIState(state, data = null) {
+            const form = document.getElementById('requestForm');
+            const search = document.getElementById('searchingState');
+            const active = document.getElementById('tripActiveState');
+
+            form.style.display = 'none';
+            search.style.display = 'none';
+            active.style.display = 'none';
+
+            if(state === 'IDLE') form.style.display = 'block';
+            if(state === 'SEARCHING') search.style.display = 'block';
+            if(state === 'ACCEPTED') {
+                active.style.display = 'block';
+                active.innerHTML = `
+                    <div class="card" style="border-left:5px solid var(--blue)">
+                        <h3>Driver Found!</h3>
+                        <p><b>${data.driver_name}</b> is coming to pick you up.</p>
+                        <p style="color:var(--slate)">${data.driver_car} • ${data.driver_plate}</p>
+                        <div style="display:flex; gap:10px; margin-top:15px;">
+                            <button class="btn" onclick="openChatBox('${data.driver_id}', '${data.driver_name}')">CHAT</button>
+                            <button class="btn" style="background:var(--red)" onclick="cancelRequest()">CANCEL</button>
+                        </div>
+                    </div>`;
             }
-
-            localStorage.removeItem('pending_rating_id');
-            document.getElementById('ratingModal').style.display = 'none';
-            alert("Rating submitted! Thank you.");
         }
 
-        async function bookInstant(id) {
-            if(!confirm("Book now?")) return;
-            localStorage.setItem('booked_driver_id', id);
-            await db.ref('drivers/' + id).update({ status: 'BOOKED' });
-        }
-
-        async function cancelInstant(id) {
-            if(confirm("Cancel ride?")) {
-                await db.ref('drivers/' + id).update({ status: 'ON' });
-                await db.ref('chats/' + id).remove();
-                localStorage.removeItem('booked_driver_id');
+        async function cancelRequest() {
+            const reqId = localStorage.getItem('active_request_id');
+            if(reqId && confirm("Cancel this request?")) {
+                await db.ref('open_requests/' + reqId).remove();
+                localStorage.removeItem('active_request_id');
+                location.reload();
             }
         }
 
-        async function showInfo(id) {
-            const s = await db.ref('drivers/' + id).get();
-            if(s.exists()) {
-                const d = s.val();
-                document.getElementById('modalName').innerText = d.name;
-                document.getElementById('modalID').innerText = "ID: " + (d.id_student || "N/A");
-                document.getElementById('modalRating').innerText = d.rating || '5.0';
-                document.getElementById('infoModal').style.display = 'flex';
-            }
-        }
-        function closeModal() { document.getElementById('infoModal').style.display = 'none'; }
-
-        // CHAT
+        // --- Chat & Rating Sama Macam Sebelum Ni ---
         function openChatBox(id, name) {
-            activeChatId = id;
             document.getElementById('chatWith').innerText = name;
             document.getElementById('chatPanel').style.display = 'flex';
-            db.ref('chats/' + id).on('value', snap => {
-                let h = "";
-                snap.forEach(m => {
-                    const msg = m.val();
-                    h += `<div class="bubble ${msg.sender === 'student' ? 'me' : 'them'}">${msg.text}</div>`;
-                });
-                const box = document.getElementById('chatMessages');
-                box.innerHTML = h;
-                box.scrollTop = box.scrollHeight;
-            });
+            // Chat logic...
         }
-        function closeChat() { 
-            document.getElementById('chatPanel').style.display = 'none'; 
-            if(activeChatId) db.ref('chats/' + activeChatId).off();
-        }
-        function sendMsg() {
-            const input = document.getElementById('chatInput');
-            if(!input.value.trim() || !activeChatId) return;
-            db.ref('chats/' + activeChatId).push({ sender: 'student', text: input.value });
-            input.value = "";
-        }
+        function closeChat() { document.getElementById('chatPanel').style.display = 'none'; }
     </script>
 </body>
 </html>
