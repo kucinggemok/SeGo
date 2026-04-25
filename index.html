@@ -11,23 +11,18 @@
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--white); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         .container { width: 100%; max-width: 450px; }
         .card { background: var(--card); padding: 20px; border-radius: 15px; margin-bottom: 15px; border: 1px solid #334155; }
-        .input-field { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; }
+        .input-field { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; width: 100%; }
+        label { font-size: 0.8rem; color: #94a3b8; margin-top: 5px; display: block; }
         .btn { width: 100%; padding: 14px; background: var(--blue); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; margin-top: 10px; }
         .tab-bar { display: flex; gap: 10px; margin-bottom: 20px; width: 100%; }
         .tab-btn { flex: 1; padding: 10px; background: #1e293b; color: white; border: 1px solid #334155; border-radius: 10px; cursor: pointer; }
         .tab-btn.active { background: var(--blue); border-color: var(--blue); font-weight: bold; }
-        
-        /* Booking Item Style */
         .booking-item { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 10px; border-left: 4px solid var(--amber); }
-        .status-accepted { border-left-color: var(--green) !important; }
-        
-        /* Chat Panel */
         #chatPanel { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 9999; display: none; flex-direction: column; }
         #chatMessages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
         .bubble { padding: 10px 15px; border-radius: 15px; max-width: 75%; font-size: 0.9rem; color: white; }
         .bubble.me { align-self: flex-end; background: var(--blue); }
         .bubble.them { align-self: flex-start; background: #334155; }
-        
         #ratingModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; display: none; align-items: center; justify-content: center; }
     </style>
 </head>
@@ -57,8 +52,26 @@
             <div id="sectionInstant">
                 <div id="requestForm" class="card">
                     <h4>Request Instant Ride</h4>
-                    <input type="text" id="pLoc" class="input-field" placeholder="Pickup Location">
-                    <input type="text" id="dLoc" class="input-field" placeholder="Destination">
+                    <label>From:</label>
+                    <select id="insPick" class="input-field" onchange="toggleOther('insPick')">
+                        <option value="UiTM">UiTM</option>
+                        <option value="US Sentral">US Sentral</option>
+                        <option value="OS Sentral">OS Sentral</option>
+                        <option value="KTM/Stesen Bas">KTM/Stesen Bas</option>
+                        <option value="Others">Others</option>
+                    </select>
+                    <input type="text" id="insPickOther" class="input-field" style="display:none;" placeholder="Specify pickup location">
+
+                    <label>Destination:</label>
+                    <select id="insDest" class="input-field" onchange="toggleOther('insDest')">
+                        <option value="US Sentral">US Sentral</option>
+                        <option value="UiTM">UiTM</option>
+                        <option value="OS Sentral">OS Sentral</option>
+                        <option value="KTM/Stesen Bas">KTM/Stesen Bas</option>
+                        <option value="Others">Others</option>
+                    </select>
+                    <input type="text" id="insDestOther" class="input-field" style="display:none;" placeholder="Specify destination">
+
                     <button class="btn" onclick="findDriver()">FIND DRIVER</button>
                 </div>
 
@@ -66,16 +79,38 @@
                     <p>Searching for Driver...</p>
                     <button class="btn" style="background:var(--red);" onclick="cancelRequest()">CANCEL</button>
                 </div>
-
                 <div id="activeTripState" style="display: none;"></div>
             </div>
 
             <div id="sectionBooking" style="display: none;">
                 <div class="card">
                     <h4>Schedule a Ride</h4>
-                    <input type="date" id="bookDate" class="input-field">
-                    <input type="time" id="bookTime" class="input-field">
-                    <input type="text" id="bookDest" class="input-field" placeholder="Destination">
+                    <label>Date & Time:</label>
+                    <div style="display: flex; gap: 5px;">
+                        <input type="date" id="bookDate" class="input-field">
+                        <input type="time" id="bookTime" class="input-field">
+                    </div>
+
+                    <label>From:</label>
+                    <select id="bookPick" class="input-field" onchange="toggleOther('bookPick')">
+                        <option value="UiTM">UiTM</option>
+                        <option value="US Sentral">US Sentral</option>
+                        <option value="OS Sentral">OS Sentral</option>
+                        <option value="KTM/Stesen Bas">KTM/Stesen Bas</option>
+                        <option value="Others">Others</option>
+                    </select>
+                    <input type="text" id="bookPickOther" class="input-field" style="display:none;" placeholder="Specify pickup">
+
+                    <label>Destination:</label>
+                    <select id="bookDest" class="input-field" onchange="toggleOther('bookDest')">
+                        <option value="US Sentral">US Sentral</option>
+                        <option value="UiTM">UiTM</option>
+                        <option value="OS Sentral">OS Sentral</option>
+                        <option value="KTM/Stesen Bas">KTM/Stesen Bas</option>
+                        <option value="Others">Others</option>
+                    </select>
+                    <input type="text" id="bookDestOther" class="input-field" style="display:none;" placeholder="Specify destination">
+
                     <button class="btn" style="background:var(--green);" onclick="submitBooking()">POST TO BOARD</button>
                 </div>
                 <div id="myBookingsList"></div>
@@ -90,17 +125,15 @@
         </div>
         <div id="chatMessages"></div>
         <div style="padding:15px; display:flex; gap:10px; background:var(--card);">
-            <input type="text" id="chatInput" class="input-field" style="margin:0" placeholder="Type message...">
-            <button class="btn" style="width:80px; margin:0;" onclick="sendChatMsg()">Send</button>
+            <input type="text" id="chatInput" class="input-field" style="margin:0" placeholder="Type message..."><button class="btn" style="width:80px; margin:0;" onclick="sendChatMsg()">Send</button>
         </div>
     </div>
 
     <div id="ratingModal">
         <div class="modal-box card" style="text-align: center; width: 80%;">
-            <h2>Rate Your Trip</h2>
+            <h2>Trip Completed!</h2>
             <select id="rateValue" class="input-field"><option value="5">⭐⭐⭐⭐⭐</option><option value="4">⭐⭐⭐⭐</option><option value="3">⭐⭐⭐</option></select>
-            <input type="text" id="rateFeedback" class="input-field" placeholder="Feedback...">
-            <button class="btn" onclick="submitRating()">Submit & Finish</button>
+            <input type="text" id="rateFeedback" class="input-field" placeholder="Feedback..."><button class="btn" onclick="submitRating()">Submit & Finish</button>
         </div>
     </div>
 
@@ -113,16 +146,6 @@
         let activeReqId = localStorage.getItem('active_request_id');
         let currentChatId = null;
 
-        function login() {
-            const id = document.getElementById('stuID').value.trim();
-            const name = document.getElementById('stuName').value.trim();
-            if(!id || !name) return alert("Fill details");
-            currentUser = { id, name };
-            localStorage.setItem('sego_user', JSON.stringify(currentUser));
-            location.reload();
-        }
-        function logout() { localStorage.clear(); location.reload(); }
-
         if(currentUser) {
             document.getElementById('loginArea').style.display = 'none';
             document.getElementById('mainApp').style.display = 'block';
@@ -131,6 +154,12 @@
             loadMyBookings();
         }
 
+        function login() {
+            const id = document.getElementById('stuID').value;
+            const name = document.getElementById('stuName').value;
+            if(id && name) { localStorage.setItem('sego_user', JSON.stringify({id, name})); location.reload(); }
+        }
+        function logout() { localStorage.clear(); location.reload(); }
         function showTab(t) {
             document.getElementById('sectionInstant').style.display = t === 'instant' ? 'block' : 'none';
             document.getElementById('sectionBooking').style.display = t === 'booking' ? 'block' : 'none';
@@ -138,11 +167,20 @@
             document.getElementById('btnBooking').className = t === 'booking' ? 'tab-btn active' : 'tab-btn';
         }
 
-        // INSTANT RIDE
+        function toggleOther(id) {
+            const val = document.getElementById(id).value;
+            document.getElementById(id + 'Other').style.display = (val === 'Others') ? 'block' : 'none';
+        }
+
+        function getVal(id) {
+            const main = document.getElementById(id).value;
+            return (main === 'Others') ? document.getElementById(id + 'Other').value : main;
+        }
+
+        // LOGIC INSTANT
         async function findDriver() {
-            const p = document.getElementById('pLoc').value;
-            const d = document.getElementById('dLoc').value;
-            if(!p || !d) return alert("Fill locations");
+            const p = getVal('insPick'); const d = getVal('insDest');
+            if(!p || !d) return alert("Select locations");
             const newReq = db.ref('open_requests').push();
             activeReqId = newReq.key;
             localStorage.setItem('active_request_id', activeReqId);
@@ -168,24 +206,22 @@
             const activeArea = document.getElementById('activeTripState');
             activeArea.style.display = s === 'ACCEPTED' ? 'block' : 'none';
             if(s === 'ACCEPTED' && data) {
-                activeArea.innerHTML = `
-                <div class="card" style="border-left:5px solid var(--green)">
-                    <h4>Driver Accepted!</h4>
-                    <p><b>${data.driver_name}</b> - ${data.driver_car}</p>
-                    <button class="btn" onclick="openChatBox('${activeReqId}', '${data.driver_name}')">CHAT WITH DRIVER</button>
+                activeArea.innerHTML = `<div class="card" style="border-left:5px solid var(--green)">
+                    <h4>Driver Found!</h4><p><b>${data.driver_name}</b> (${data.driver_car})</p>
+                    <button class="btn" onclick="openChatBox('${activeReqId}', '${data.driver_name}')">CHAT DRIVER</button>
                     <button class="btn" style="background:var(--amber); color:black;" onclick="finishTripManual()">FINISH TRIP</button>
                 </div>`;
             }
         }
 
-        // PRE-BOOKING LOGIC
+        // LOGIC PRE-BOOKING
         async function submitBooking() {
             const date = document.getElementById('bookDate').value;
             const time = document.getElementById('bookTime').value;
-            const dest = document.getElementById('bookDest').value;
-            if(!date || !time || !dest) return alert("Fill all fields");
-            await db.ref('bookings').push({ student_id: currentUser.id, student_name: currentUser.name, date, time, dest, status: 'PENDING' });
-            alert("Pre-booking posted!");
+            const p = getVal('bookPick'); const d = getVal('bookDest');
+            if(!date || !time || !p || !d) return alert("Fill all details");
+            await db.ref('bookings').push({ student_id: currentUser.id, student_name: currentUser.name, date, time, pickup: p, dest: d, status: 'PENDING' });
+            alert("Booking Posted!");
         }
 
         function loadMyBookings() {
@@ -194,76 +230,44 @@
                 snap.forEach(c => {
                     const b = c.val();
                     if(b.student_id === currentUser.id) {
-                        const isAccepted = b.status === 'ACCEPTED';
-                        h += `
-                        <div class="booking-item ${isAccepted ? 'status-accepted' : ''}">
-                            <div style="display:flex; justify-content:space-between;">
-                                <b>To: ${b.dest}</b>
-                                <span style="font-size:0.7rem; font-weight:bold; color:${isAccepted ? 'var(--green)':'var(--amber)'}">${b.status}</span>
-                            </div>
-                            <small>${b.date} | ${b.time}</small>
-                            ${isAccepted ? 
-                                `<button class="btn" style="padding:8px; font-size:0.8rem;" onclick="openChatBox('${c.key}', '${b.driver_name}')">CHAT DRIVER</button>` : 
-                                `<br><button onclick="db.ref('bookings/${c.key}').remove()" style="color:var(--red); background:none; border:none; font-size:0.7rem; cursor:pointer; margin-top:10px;">Cancel Booking</button>`
-                            }
+                        const isAcc = b.status === 'ACCEPTED';
+                        h += `<div class="booking-item ${isAcc?'status-accepted':''}">
+                            <b>From: ${b.pickup} <br>To: ${b.dest}</b><br>
+                            <small>${b.date} | ${b.time} | <b>${b.status}</b></small><br>
+                            ${isAcc ? `<button class="btn" style="padding:8px; font-size:0.8rem;" onclick="openChatBox('${c.key}', '${b.driver_name}')">CHAT DRIVER</button>` : 
+                            `<button onclick="db.ref('bookings/${c.key}').remove()" style="color:var(--red); background:none; border:none; font-size:0.7rem; cursor:pointer; margin-top:10px;">Cancel Booking</button>`}
                         </div>`;
                     }
                 });
-                document.getElementById('myBookingsList').innerHTML = h || "<p style='text-align:center; color:gray;'>No bookings yet.</p>";
+                document.getElementById('myBookingsList').innerHTML = h || "<p style='text-align:center; color:gray;'>No bookings.</p>";
             });
         }
 
-        // CHAT LOGIC
+        // CHAT, RATING, CANCEL (Sama logic macam sebelumnya)
         function openChatBox(id, name) {
-            currentChatId = id;
-            document.getElementById('chatWith').innerText = name;
+            currentChatId = id; document.getElementById('chatWith').innerText = name;
             document.getElementById('chatPanel').style.display = 'flex';
             db.ref('chats/' + id).on('value', snap => {
-                let h = "";
-                snap.forEach(m => {
-                    const msg = m.val();
-                    h += `<div class="bubble ${msg.sender === 'student' ? 'me' : 'them'}">${msg.text}</div>`;
-                });
-                const box = document.getElementById('chatMessages');
-                box.innerHTML = h; box.scrollTop = box.scrollHeight;
+                let h = ""; snap.forEach(m => { const msg = m.val(); h += `<div class="bubble ${msg.sender==='student'?'me':'them'}">${msg.text}</div>`; });
+                const box = document.getElementById('chatMessages'); box.innerHTML = h; box.scrollTop = box.scrollHeight;
             });
         }
-
         function closeChat() { document.getElementById('chatPanel').style.display = 'none'; }
-
         async function sendChatMsg() {
-            const i = document.getElementById('chatInput');
-            if(!i.value.trim()) return;
-            await db.ref('chats/' + currentChatId).push({ sender: 'student', text: i.value });
-            i.value = "";
+            const i = document.getElementById('chatInput'); if(!i.value.trim()) return;
+            await db.ref('chats/' + currentChatId).push({ sender: 'student', text: i.value }); i.value = "";
         }
-
-        // FINISH & RATING
         async function finishTripManual() {
             const snap = await db.ref('open_requests/' + activeReqId).get();
-            if(snap.exists()) {
-                const d = snap.val();
-                localStorage.setItem('pending_rating_id', d.driver_id);
-                await db.ref('open_requests/' + activeReqId).update({ status: 'COMPLETED' });
-            }
+            if(snap.exists()) { localStorage.setItem('pending_rating_id', snap.val().driver_id); await db.ref('open_requests/' + activeReqId).update({ status: 'COMPLETED' }); }
         }
-
         async function submitRating() {
             const drvId = localStorage.getItem('pending_rating_id');
-            if(drvId) {
-                await db.ref('drivers/' + drvId + '/feedbacks').push({
-                    rating: document.getElementById('rateValue').value,
-                    comment: document.getElementById('rateFeedback').value,
-                    student: currentUser.name
-                });
-            }
+            if(drvId) { await db.ref('drivers/' + drvId + '/feedbacks').push({ rating: document.getElementById('rateValue').value, comment: document.getElementById('rateFeedback').value, student: currentUser.name }); }
             if(activeReqId) await db.ref('open_requests/' + activeReqId).remove();
-            localStorage.removeItem('active_request_id');
-            localStorage.removeItem('pending_rating_id');
-            document.getElementById('ratingModal').style.display = 'none';
+            localStorage.removeItem('active_request_id'); localStorage.removeItem('pending_rating_id');
             location.reload();
         }
-
         async function cancelRequest() { if(confirm("Cancel?")) { await db.ref('open_requests/' + activeReqId).remove(); localStorage.removeItem('active_request_id'); location.reload(); } }
     </script>
 </body>
