@@ -75,7 +75,6 @@
         }
         .btn:active { transform: scale(0.98); }
 
-        /* Driver Registration Overlay */
         #driverRegOverlay { position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); z-index:20000; display:none; flex-direction:column; padding:20px; box-sizing:border-box; overflow-y:auto; }
 
         .tab-bar { display: flex; gap: 8px; margin-bottom: 20px; width: 100%; background: #1e293b; padding: 6px; border-radius: 8px; border: 1px solid var(--border); box-sizing: border-box; }
@@ -199,7 +198,6 @@
                         <input type="date" id="bookDate" class="input-field">
                         <input type="time" id="bookTime" class="input-field">
                     </div>
-                    
                     <label>From:</label>
                     <select id="bookPick" class="input-field" onchange="toggleOther('bookPick')">
                         <option value="UiTM">UiTM</option><option value="US Sentral">US Sentral</option><option value="OS Sentral">OS Sentral</option><option value="KTM/Stesen Bas">KTM/Stesen Bas</option><option value="Others">Others</option>
@@ -211,7 +209,6 @@
                         <option value="US Sentral">US Sentral</option><option value="UiTM">UiTM</option><option value="OS Sentral">OS Sentral</option><option value="KTM/Stesen Bas">KTM/Stesen Bas</option><option value="Others">Others</option>
                     </select>
                     <input type="text" id="bookDestOther" class="input-field" style="display:none;" placeholder="Specify destination">
-
                     <button class="btn" style="background:var(--green);" onclick="submitBooking()">POST BOOKING</button>
                 </div>
                 <div id="myBookingsList"></div>
@@ -225,25 +222,18 @@
             <div class="card">
                 <label>Full Name</label>
                 <input type="text" id="dRegName" class="input-field" placeholder="Nama Penuh (Ikut Kad Matrik)">
-                
                 <label>Username</label>
                 <input type="text" id="dRegUser" class="input-field" placeholder="Username Pilihan">
-                
                 <label>Student ID</label>
                 <input type="text" id="dRegStuID" class="input-field" placeholder="E.g. 2023123456">
-                
                 <label>Password</label>
                 <input type="password" id="dRegPass" class="input-field" placeholder="Min 6 characters">
-                
                 <label>Car Model & Color</label>
                 <input type="text" id="dRegCar" class="input-field" placeholder="E.g. Perodua Myvi (White)">
-                
                 <label>Car Plate Number</label>
                 <input type="text" id="dRegPlate" class="input-field" placeholder="ABC 1234">
-                
                 <label>Phone Number (WhatsApp)</label>
                 <input type="text" id="dRegPhone" class="input-field" placeholder="0123456789">
-                
                 <button class="btn" onclick="submitDriverApp()">SUBMIT APPLICATION</button>
                 <button class="btn" style="background:transparent; color:var(--slate); border:1px solid var(--border);" onclick="closeDriverReg()">CANCEL</button>
             </div>
@@ -253,7 +243,7 @@
     <div id="generalFeedbackModal">
         <div class="modal-content" style="text-align: center;">
             <h2 style="margin: 0 0 10px 0;">App Feedback</h2>
-            <p style="color: var(--slate); font-size: 0.9rem;">Help us improve SeGo by sharing your experience or reporting an issue.</p>
+            <p style="color: var(--slate); font-size: 0.9rem;">Help us improve SeGo by sharing your experience.</p>
             <div class="stars">
                 <input type="radio" id="g5" name="g_rating" value="5"><label for="g5">★</label>
                 <input type="radio" id="g4" name="g_rating" value="4"><label for="g4">★</label>
@@ -270,7 +260,7 @@
     <div id="ratingModal">
         <div class="modal-content" style="text-align: center;">
             <h2 style="margin: 0 0 10px 0;">Trip Completed</h2>
-            <p style="color: var(--slate); font-size: 0.9rem;">Rate your driver to keep the SeGo community reliable.</p>
+            <p style="color: var(--slate); font-size: 0.9rem;">Rate your driver.</p>
             <div class="stars">
                 <input type="radio" id="s5" name="rating" value="5"><label for="s5">★</label>
                 <input type="radio" id="s4" name="rating" value="4"><label for="s4">★</label>
@@ -278,7 +268,7 @@
                 <input type="radio" id="s2" name="rating" value="2"><label for="s2">★</label>
                 <input type="radio" id="s1" name="rating" value="1"><label for="s1">★</label>
             </div>
-            <textarea id="rateFeedback" rows="3" placeholder="Anything to add? (Optional)"></textarea>
+            <textarea id="rateFeedback" rows="3" placeholder="Anything to add?"></textarea>
             <button class="btn" onclick="submitTripRating()">Submit Review</button>
         </div>
     </div>
@@ -327,7 +317,6 @@
             loadMyBookings();
         }
 
-        // --- AUTH & REGISTRATION ---
         function toggleAuth() {
             const login = document.getElementById('loginArea');
             const register = document.getElementById('registerArea');
@@ -358,7 +347,6 @@
             } else { alert("ID not found. Please register first!"); }
         }
 
-        // --- DRIVER REGISTRATION LOGIC (UPDATED) ---
         function openDriverReg() { document.getElementById('driverRegOverlay').style.display = 'flex'; }
         function closeDriverReg() { document.getElementById('driverRegOverlay').style.display = 'none'; }
         
@@ -375,7 +363,6 @@
                 return alert("Sila isi semua maklumat dengan betul!");
             }
 
-            // Guna username sebagai key utama dalam database
             await db.ref('driver_pending/' + user).set({
                 name: name,
                 username: user,
@@ -391,7 +378,6 @@
             closeDriverReg();
         }
 
-        // --- GENERAL FEEDBACK LOGIC ---
         function openGeneralFeedback() { document.getElementById('generalFeedbackModal').style.display = 'flex'; }
         function closeGeneralFeedback() { document.getElementById('generalFeedbackModal').style.display = 'none'; }
         async function submitGeneralFeedback() {
@@ -408,7 +394,6 @@
             closeGeneralFeedback();
         }
 
-        // --- CORE FUNCTIONS ---
         function setPax(n) { selectedPax = n; document.querySelectorAll('.pax-btn').forEach(b => b.classList.remove('active')); document.getElementById('pax'+n).classList.add('active'); }
         function logout() { localStorage.clear(); location.reload(); }
         function showTab(t) { document.getElementById('sectionInstant').style.display = t === 'instant' ? 'block' : 'none'; document.getElementById('sectionBooking').style.display = t === 'booking' ? 'block' : 'none'; document.getElementById('btnInstant').classList.toggle('active', t === 'instant'); document.getElementById('btnBooking').classList.toggle('active', t === 'booking'); }
@@ -464,14 +449,7 @@
             const comment = document.getElementById('rateFeedback').value.trim();
             const drvId = localStorage.getItem('pending_rating_id');
             if(!rating) return alert("Please select a star rating");
-            if(drvId) { 
-                await db.ref('feedbacks/' + drvId).push({ 
-                    student_name: currentUser.name, 
-                    rating: rating, 
-                    comment: comment, 
-                    timestamp: Date.now() 
-                }); 
-            }
+            if(drvId) { await db.ref('feedbacks/' + drvId).push({ student_name: currentUser.name, rating: rating, comment: comment, timestamp: Date.now() }); }
             if(activeReqId) { await db.ref('open_requests/' + activeReqId).remove(); await db.ref('chats/' + activeReqId).remove(); }
             localStorage.removeItem('active_request_id');
             localStorage.removeItem('pending_rating_id');
@@ -520,9 +498,9 @@
                         </div>`;
                     }
                 });
-                document.getElementById('myBookingsList').innerHTML = h || "<p style='text-align:center; color:var(--slate); font-size:0.9rem;'>No bookings yet.</p>";
+                document.getElementById('myBookingsList').innerHTML = h;
             });
         }
- </script>
+    </script>
 </body>
 </html>
