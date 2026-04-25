@@ -19,17 +19,17 @@
         .tab-btn { flex: 1; padding: 10px; background: #1e293b; color: white; border: 1px solid #334155; border-radius: 10px; cursor: pointer; }
         .tab-btn.active { background: var(--blue); border-color: var(--blue); font-weight: bold; }
         
-        /* Pax Buttons */
         .pax-btn { width: 45px; height: 45px; border-radius: 50%; border: 1px solid var(--blue); background: none; color: white; cursor: pointer; }
         .pax-btn.active { background: var(--blue); font-weight: bold; }
 
-        /* Custom Modal Info Driver */
         #infoModal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10001; align-items:center; justify-content:center; backdrop-filter: blur(5px); }
         .modal-content { background: var(--card); width: 85%; max-width: 350px; padding: 25px; border-radius: 20px; border: 1px solid #475569; text-align: center; }
         .info-row { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #334155; padding-bottom: 5px; }
         .plate-box { background: var(--amber); color: black; padding: 5px 15px; border-radius: 5px; font-weight: 900; font-family: monospace; font-size: 1.2rem; }
 
-        /* Chat & Rating */
+        .booking-item { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 10px; border-left: 4px solid var(--amber); }
+        .status-accepted { border-left-color: var(--green) !important; }
+
         #chatPanel { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 9999; display: none; flex-direction: column; }
         #chatMessages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
         .bubble { padding: 10px 15px; border-radius: 15px; max-width: 75%; font-size: 0.9rem; color: white; }
@@ -66,21 +66,13 @@
                     <h4>Instant Request</h4>
                     <label>From:</label>
                     <select id="insPick" class="input-field" onchange="toggleOther('insPick')">
-                        <option value="UiTM">UiTM</option>
-                        <option value="US Sentral">US Sentral</option>
-                        <option value="OS Sentral">OS Sentral</option>
-                        <option value="KTM/Stesen Bas">KTM/Stesen Bas</option>
-                        <option value="Others">Others</option>
+                        <option value="UiTM">UiTM</option><option value="US Sentral">US Sentral</option><option value="OS Sentral">OS Sentral</option><option value="KTM/Stesen Bas">KTM/Stesen Bas</option><option value="Others">Others</option>
                     </select>
                     <input type="text" id="insPickOther" class="input-field" style="display:none;" placeholder="Where exactly?">
 
                     <label>To:</label>
                     <select id="insDest" class="input-field" onchange="toggleOther('insDest')">
-                        <option value="US Sentral">US Sentral</option>
-                        <option value="UiTM">UiTM</option>
-                        <option value="OS Sentral">OS Sentral</option>
-                        <option value="KTM/Stesen Bas">KTM/Stesen Bas</option>
-                        <option value="Others">Others</option>
+                        <option value="US Sentral">US Sentral</option><option value="UiTM">UiTM</option><option value="OS Sentral">OS Sentral</option><option value="KTM/Stesen Bas">KTM/Stesen Bas</option><option value="Others">Others</option>
                     </select>
                     <input type="text" id="insDestOther" class="input-field" style="display:none;" placeholder="Destination name?">
 
@@ -95,7 +87,6 @@
                 </div>
 
                 <div id="searchingState" class="card" style="display: none; text-align: center;">
-                    <div class="loader"></div>
                     <p>Searching for nearby drivers...</p>
                     <button class="btn" style="background:var(--red);" onclick="cancelRequest()">CANCEL</button>
                 </div>
@@ -105,22 +96,23 @@
             <div id="sectionBooking" style="display: none;">
                 <div class="card">
                     <h4>Pre-Booking</h4>
-                    <input type="date" id="bookDate" class="input-field">
-                    <input type="time" id="bookTime" class="input-field">
+                    <label>Date & Time:</label>
+                    <div style="display: flex; gap: 5px;">
+                        <input type="date" id="bookDate" class="input-field">
+                        <input type="time" id="bookTime" class="input-field">
+                    </div>
                     
                     <label>From:</label>
                     <select id="bookPick" class="input-field" onchange="toggleOther('bookPick')">
-                        <option value="UiTM">UiTM</option><option value="US Sentral">US Sentral</option>
-                        <option value="Others">Others</option>
+                        <option value="UiTM">UiTM</option><option value="US Sentral">US Sentral</option><option value="OS Sentral">OS Sentral</option><option value="KTM/Stesen Bas">KTM/Stesen Bas</option><option value="Others">Others</option>
                     </select>
-                    <input type="text" id="bookPickOther" class="input-field" style="display:none;">
+                    <input type="text" id="bookPickOther" class="input-field" style="display:none;" placeholder="Specify pickup">
 
                     <label>To:</label>
                     <select id="bookDest" class="input-field" onchange="toggleOther('bookDest')">
-                        <option value="US Sentral">US Sentral</option><option value="UiTM">UiTM</option>
-                        <option value="Others">Others</option>
+                        <option value="US Sentral">US Sentral</option><option value="UiTM">UiTM</option><option value="OS Sentral">OS Sentral</option><option value="KTM/Stesen Bas">KTM/Stesen Bas</option><option value="Others">Others</option>
                     </select>
-                    <input type="text" id="bookDestOther" class="input-field" style="display:none;">
+                    <input type="text" id="bookDestOther" class="input-field" style="display:none;" placeholder="Specify destination">
 
                     <button class="btn" style="background:var(--green);" onclick="submitBooking()">POST BOOKING</button>
                 </div>
@@ -153,7 +145,7 @@
 
     <div id="ratingModal">
         <div class="card" style="text-align: center; width: 85%;">
-            <h2>Rate your trip!</h2>
+            <h2>Trip Completed!</h2>
             <select id="rateValue" class="input-field"><option value="5">⭐⭐⭐⭐⭐</option><option value="4">⭐⭐⭐⭐</option></select>
             <input type="text" id="rateFeedback" class="input-field" placeholder="Feedback..."><button class="btn" onclick="submitRating()">Submit</button>
         </div>
@@ -237,8 +229,8 @@
                 area.innerHTML = `<div class="card" style="border-left:5px solid var(--green)">
                     <h4>Driver Found!</h4><p><b>${data.driver_name}</b> is coming.</p>
                     <button class="btn" style="background:#475569" onclick="openInfo('${data.driver_name}','${data.driver_id}','${data.driver_car}','${data.driver_plate||'N/A'}')">DRIVER INFO</button>
-                    <button class="btn" onclick="openChatBox('${activeReqId}','${data.driver_name}')">CHAT</button>
-                    <button class="btn" style="background:var(--amber); color:black" onclick="finishTripManual()">FINISH TRIP</button>
+                    <button class="btn" onclick="openChatBox('${activeReqId}','${data.driver_name}')">💬 CHAT DRIVER</button>
+                    <button class="btn" style="background:var(--amber); color:black" onclick="finishTripManual()">✅ FINISH TRIP</button>
                 </div>`;
             }
         }
@@ -254,9 +246,8 @@
         async function submitRating() {
             const drvId = localStorage.getItem('pending_rating_id');
             if(drvId) {
-                await db.ref('drivers/' + drvId + '/feedbacks').push({ rating: document.getElementById('rateValue').value, comment: document.getElementById('rateFeedback').value, student: currentUser.name });
+                await db.ref('drivers/' + drvId + '/feedbacks').push({ rating: document.getElementById('rateValue').value, comment: document.getElementById('rateFeedback').value, student: currentUser.name, date: new Date().toLocaleDateString() });
             }
-            // CLEAR FIREBASE - PENTING!
             if(activeReqId) {
                 await db.ref('open_requests/' + activeReqId).remove();
                 await db.ref('chats/' + activeReqId).remove();
@@ -265,7 +256,6 @@
             location.reload();
         }
 
-        // Logic Chat & Other Functions
         function openChatBox(id, name) {
             currentChatId = id; document.getElementById('chatWith').innerText = name;
             document.getElementById('chatPanel').style.display = 'flex';
@@ -279,23 +269,37 @@
             const i = document.getElementById('chatInput'); if(!i.value.trim()) return;
             await db.ref('chats/' + currentChatId).push({ sender: 'student', text: i.value }); i.value = "";
         }
-        async function cancelRequest() { if(confirm("Cancel?")) { await db.ref('open_requests/' + activeReqId).remove(); localStorage.removeItem('active_request_id'); location.reload(); } }
+        async function cancelRequest() { if(confirm("Cancel this request?")) { await db.ref('open_requests/' + activeReqId).remove(); localStorage.removeItem('active_request_id'); location.reload(); } }
+        async function cancelBooking(bid) { if(confirm("Cancel this booking?")) { await db.ref('bookings/' + bid).remove(); } }
+        
         async function finishTripManual() {
             const snap = await db.ref('open_requests/' + activeReqId).get();
             if(snap.exists()) { localStorage.setItem('pending_rating_id', snap.val().driver_id); await db.ref('open_requests/' + activeReqId).update({ status: 'COMPLETED' }); }
         }
+
         async function submitBooking() {
             const d = document.getElementById('bookDate').value; const t = document.getElementById('bookTime').value;
             const p = getVal('bookPick'); const ds = getVal('bookDest');
-            if(!d || !t || !p || !ds) return alert("Fill all!");
+            if(!d || !t || !p || !ds) return alert("Please fill all details");
             await db.ref('bookings').push({ student_id: currentUser.id, student_name: currentUser.name, date: d, time: t, pickup: p, dest: ds, status: 'PENDING' });
-            alert("Booking Posted!");
+            alert("Booking Posted to Board!");
         }
+
         function loadMyBookings() {
             db.ref('bookings').on('value', snap => {
-                let h = ""; snap.forEach(c => { const b = c.val(); if(b.student_id === currentUser.id) {
-                h += `<div class="booking-item"><b>${b.pickup} ➔ ${b.dest}</b><br><small>${b.date} | ${b.time} | ${b.status}</small></div>`; }});
-                document.getElementById('myBookingsList').innerHTML = h || "No bookings.";
+                let h = ""; snap.forEach(c => { 
+                    const b = c.val(); 
+                    if(b.student_id === currentUser.id) {
+                        const isAcc = b.status === 'ACCEPTED';
+                        h += `<div class="booking-item ${isAcc ? 'status-accepted' : ''}">
+                            <b>${b.pickup} ➔ ${b.dest}</b><br>
+                            <small>${b.date} | ${b.time} | <b>${b.status}</b></small><br>
+                            ${isAcc ? `<button class="btn" style="padding:8px; font-size:0.8rem;" onclick="openChatBox('${c.key}', '${b.driver_name}')">💬 CHAT DRIVER</button>` : 
+                            `<button class="btn" style="background:var(--red); padding:8px; font-size:0.8rem;" onclick="cancelBooking('${c.key}')">❌ CANCEL</button>`}
+                        </div>`;
+                    }
+                });
+                document.getElementById('myBookingsList').innerHTML = h || "<p style='text-align:center; color:gray;'>No bookings yet.</p>";
             });
         }
     </script>
