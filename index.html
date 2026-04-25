@@ -137,7 +137,7 @@
                 <label>Full Name</label>
                 <input type="text" id="regName" class="input-field" placeholder="As Per Matrix">
                 <label>Phone Number</label>
-                <input type="text" id="regPhone" class="input-field" placeholder="Phone Number">
+                <input type="text" id="regPhone" class="input-field" placeholder="0123456789">
                 <button class="btn" style="background: var(--green);" onclick="register()">Create Account</button>
                 <p style="text-align:center; font-size:0.85rem; margin-top:15px; color:var(--slate);">
                     Already have account? <span style="color:var(--blue); cursor:pointer; font-weight:600;" onclick="toggleAuth()">Login</span>
@@ -242,8 +242,7 @@
 
     <div id="generalFeedbackModal">
         <div class="modal-content" style="text-align: center;">
-            <h2 style="margin: 0 0 10px 0;">App Feedback</h2>
-            <p style="color: var(--slate); font-size: 0.9rem;">Help us improve SeGo by sharing your experience.</p>
+            <h2>App Feedback</h2>
             <div class="stars">
                 <input type="radio" id="g5" name="g_rating" value="5"><label for="g5">★</label>
                 <input type="radio" id="g4" name="g_rating" value="4"><label for="g4">★</label>
@@ -259,8 +258,7 @@
 
     <div id="ratingModal">
         <div class="modal-content" style="text-align: center;">
-            <h2 style="margin: 0 0 10px 0;">Trip Completed</h2>
-            <p style="color: var(--slate); font-size: 0.9rem;">Rate your driver.</p>
+            <h2>Trip Completed</h2>
             <div class="stars">
                 <input type="radio" id="s5" name="rating" value="5"><label for="s5">★</label>
                 <input type="radio" id="s4" name="rating" value="4"><label for="s4">★</label>
@@ -275,7 +273,7 @@
 
     <div id="infoModal">
         <div class="modal-content">
-            <h3 style="margin-bottom:20px;">Driver Information</h3>
+            <h3>Driver Information</h3>
             <div class="info-row"><span>Name</span><b id="mdName"></b></div>
             <div class="info-row"><span>Driver ID</span><b id="mdID"></b></div>
             <div class="info-row"><span>Car</span><b id="mdCar"></b></div>
@@ -328,7 +326,7 @@
             const id = document.getElementById('regID').value.trim();
             const name = document.getElementById('regName').value.trim().toUpperCase();
             const phone = document.getElementById('regPhone').value.trim();
-            if(id.length < 5 || name.length < 3) return alert("Please fill all details correctly!");
+            if(id.length < 5 || name.length < 3 || !phone) return alert("Please fill all details correctly!");
             const check = await db.ref('students/' + id).get();
             if(check.exists()) return alert("This ID is already registered!");
             await db.ref('students/' + id).set({ name: name, phone: phone });
@@ -350,7 +348,6 @@
         function openDriverReg() { document.getElementById('driverRegOverlay').style.display = 'flex'; }
         function closeDriverReg() { document.getElementById('driverRegOverlay').style.display = 'none'; }
         
-        // --- REPAIRED FUNCTION START ---
         async function submitDriverApp() {
             const name = document.getElementById('dRegName').value.trim().toUpperCase();
             const user = document.getElementById('dRegUser').value.trim();
@@ -364,31 +361,22 @@
                 return alert("Sila isi semua maklumat dengan betul!");
             }
 
-            // Simpan guna standard variable name: 'student_id' dan 'phone'
-            await db.ref('driver_pending/' + user).set({
-                name: name,
-                username: user,
-                student_id: stuID, 
-                password: pass,
-                car: car,
-                plate: plate,
-                phone: phone, 
-                appliedAt: Date.now()
-            });
-            
-            alert("Application Sent! Sila tunggu admin hubungi anda untuk pengesahan.");
-            closeDriverReg();
-            
-            // Clear fields
-            document.getElementById('dRegName').value = "";
-            document.getElementById('dRegUser').value = "";
-            document.getElementById('dRegStuID').value = "";
-            document.getElementById('dRegPass').value = "";
-            document.getElementById('dRegCar').value = "";
-            document.getElementById('dRegPlate').value = "";
-            document.getElementById('dRegPhone').value = "";
+            try {
+                await db.ref('driver_pending/' + user).set({
+                    name: name,
+                    username: user,
+                    student_id: stuID, 
+                    password: pass,
+                    car: car,
+                    plate: plate,
+                    phone: phone, 
+                    appliedAt: Date.now(),
+                    status: "PENDING"
+                });
+                alert("Application Sent! Sila tunggu admin hubungi anda.");
+                closeDriverReg();
+            } catch(e) { alert("Error: " + e.message); }
         }
-        // --- REPAIRED FUNCTION END ---
 
         function openGeneralFeedback() { document.getElementById('generalFeedbackModal').style.display = 'flex'; }
         function closeGeneralFeedback() { document.getElementById('generalFeedbackModal').style.display = 'none'; }
@@ -396,14 +384,8 @@
             const rating = document.querySelector('input[name="g_rating"]:checked')?.value;
             const comment = document.getElementById('g_comment').value.trim();
             if(!rating) return alert("Please select a star rating");
-            await db.ref('feedbacks/app_general').push({
-                student_name: currentUser ? currentUser.name : "Anonymous",
-                rating: rating,
-                comment: comment,
-                timestamp: Date.now()
-            });
-            alert("Thank you! Your feedback has been submitted.");
-            closeGeneralFeedback();
+            await db.ref('feedbacks/app_general').push({ student_name: currentUser ? currentUser.name : "Anonymous", rating: rating, comment: comment, timestamp: Date.now() });
+            alert("Thank you!"); closeGeneralFeedback();
         }
 
         function setPax(n) { selectedPax = n; document.querySelectorAll('.pax-btn').forEach(b => b.classList.remove('active')); document.getElementById('pax'+n).classList.add('active'); }
@@ -442,8 +424,8 @@
             area.style.display = s === 'ACCEPTED' ? 'block' : 'none';
             if(s === 'ACCEPTED' && data) {
                 area.innerHTML = `<div class="card" style="border-left:4px solid var(--green)">
-                    <h4 style="margin-bottom:5px;">Driver Found</h4><p style="color:var(--slate); font-size:0.9rem; margin-top:0;"><b>${data.driver_name}</b> is on the way.</p>
-                    <button class="btn" style="background:transparent; border:1px solid var(--border); color:var(--white);" onclick="openInfo('${data.driver_name}','${data.driver_id}','${data.driver_car}','${data.driver_plate||'N/A'}')">DRIVER INFO</button>
+                    <h4>Driver Found</h4><p><b>${data.driver_name}</b> is on the way.</p>
+                    <button class="btn" onclick="openInfo('${data.driver_name}','${data.driver_id}','${data.driver_car}','${data.driver_plate||'N/A'}')">DRIVER INFO</button>
                     <button class="btn" onclick="openChatBox('${activeReqId}','${data.driver_name}')">CHAT DRIVER</button>
                     <button class="btn" style="background:var(--white); color:var(--bg);" onclick="finishTripManual()">FINISH TRIP</button>
                 </div>`;
@@ -460,9 +442,9 @@
             const rating = document.querySelector('input[name="rating"]:checked')?.value;
             const comment = document.getElementById('rateFeedback').value.trim();
             const drvId = localStorage.getItem('pending_rating_id');
-            if(!rating) return alert("Please select a star rating");
+            if(!rating) return alert("Please select rating");
             if(drvId) { await db.ref('feedbacks/' + drvId).push({ student_name: currentUser.name, rating: rating, comment: comment, timestamp: Date.now() }); }
-            if(activeReqId) { await db.ref('open_requests/' + activeReqId).remove(); await db.ref('chats/' + activeReqId).remove(); }
+            if(activeReqId) { await db.ref('open_requests/' + activeReqId).remove(); }
             localStorage.removeItem('active_request_id');
             localStorage.removeItem('pending_rating_id');
             location.reload();
@@ -481,19 +463,14 @@
             const i = document.getElementById('chatInput'); if(!i.value.trim()) return;
             await db.ref('chats/' + currentChatId).push({ sender: 'student', text: i.value }); i.value = "";
         }
-        async function cancelRequest() { if(confirm("Cancel this request?")) { await db.ref('open_requests/' + activeReqId).remove(); localStorage.removeItem('active_request_id'); location.reload(); } }
-        async function cancelBooking(bid) { if(confirm("Cancel this booking?")) { await db.ref('bookings/' + bid).remove(); } }
-        async function finishTripManual() {
-            const snap = await db.ref('open_requests/' + activeReqId).get();
-            if(snap.exists()) { localStorage.setItem('pending_rating_id', snap.val().driver_id); await db.ref('open_requests/' + activeReqId).update({ status: 'COMPLETED' }); }
-        }
-
+        async function cancelRequest() { if(confirm("Cancel?")) { await db.ref('open_requests/' + activeReqId).remove(); localStorage.removeItem('active_request_id'); location.reload(); } }
+        
         async function submitBooking() {
             const d = document.getElementById('bookDate').value; const t = document.getElementById('bookTime').value;
             const p = getVal('bookPick'); const ds = getVal('bookDest');
-            if(!d || !t || !p || !ds) return alert("Please fill all details");
+            if(!d || !t || !p || !ds) return alert("Fill all details");
             await db.ref('bookings').push({ student_id: currentUser.id, student_name: currentUser.name, date: d, time: t, pickup: p, dest: ds, status: 'PENDING' });
-            alert("Booking Posted to Board!");
+            alert("Booking Posted!");
         }
 
         function loadMyBookings() {
@@ -503,10 +480,9 @@
                     if(b.student_id === currentUser.id) {
                         const isAcc = b.status === 'ACCEPTED';
                         h += `<div class="booking-item ${isAcc ? 'status-accepted' : ''}">
-                            <b style="font-size:0.95rem;">${b.pickup} ➔ ${b.dest}</b><br>
-                            <small style="color:var(--slate);">${b.date} | ${b.time} | <span style="color:${isAcc ? 'var(--green)' : 'var(--amber)'}; font-weight:600;">${b.status}</span></small><br>
-                            ${isAcc ? `<button class="btn" style="padding:10px; font-size:0.85rem; margin-top:12px;" onclick="openChatBox('${c.key}', '${b.driver_name}')">CHAT DRIVER</button>` : 
-                            `<button class="btn" style="background:transparent; border:1px solid var(--red); color:var(--red); padding:10px; font-size:0.85rem; margin-top:12px;" onclick="cancelBooking('${c.key}')">CANCEL</button>`}
+                            <b>${b.pickup} ➔ ${b.dest}</b><br>
+                            <small>${b.date} | ${b.time} | <b>${b.status}</b></small><br>
+                            ${isAcc ? `<button class="btn" style="padding:10px;" onclick="openChatBox('${c.key}', '${b.driver_name}')">CHAT</button>` : `<button class="btn" style="background:red; padding:10px;" onclick="db.ref('bookings/${c.key}').remove()">CANCEL</button>`}
                         </div>`;
                     }
                 });
