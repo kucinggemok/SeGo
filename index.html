@@ -431,15 +431,38 @@
             document.getElementById('searchingState').style.display = s === 'SEARCHING' ? 'block' : 'none';
             const area = document.getElementById('activeTripState');
             area.style.display = s === 'ACCEPTED' ? 'block' : 'none';
+            
             if(s === 'ACCEPTED' && data) {
-                area.innerHTML = `<div class="card" style="border-left:4px solid var(--green)">
-                    <h4>Driver Found</h4><p><b>${data.driver_name}</b> is on the way.</p>
-                    <button class="btn" onclick="openInfo('${data.driver_name}','${data.driver_id}','${data.driver_car}','${data.driver_plate||'N/A'}')">DRIVER INFO</button>
+                // Logik untuk Driver ID: Kalau driver_id asal diletak (cth: d001), kita besarkan.
+                // Kalau driver_id tu username (cth: ali), kita paparkan username tu.
+                const displayID = data.driver_id ? data.driver_id.toUpperCase() : "N/A";
+
+                area.innerHTML = `
+                <div class="card" style="border-left:4px solid var(--green)">
+                    <h4>Driver Found</h4>
+                    <p><b>${data.driver_name}</b> is on the way.</p>
+                    <button class="btn" onclick="openInfo('${data.driver_name}','${displayID}','${data.driver_car}','${data.driver_plate||'N/A'}')">DRIVER INFO</button>
                     <button class="btn" onclick="openChatBox('${activeReqId}','${data.driver_name}')">CHAT DRIVER</button>
                     <button class="btn" style="background:var(--white); color:var(--bg);" onclick="finishTripManual()">FINISH TRIP</button>
                 </div>`;
             }
         }
+
+        // --- INI FUNGSI YANG HILANG TADI ---
+        async function finishTripManual() {
+            if(confirm("Dah sampai ke destinasi? Tekan OK untuk beri rating.")) {
+                try {
+                    // Update status dalam Firebase supaya Driver pun tahu trip dah tamat
+                    await db.ref('open_requests/' + activeReqId).update({
+                        status: 'COMPLETED'
+                    });
+                    // Bila status jadi COMPLETED, function listenToRequest() akan auto-trigger rating modal
+                } catch (e) {
+                    console.error(e);
+                    alert("Gagal menamatkan trip. Cuba lagi.");
+                }
+            }
+        }   
 
         function openInfo(name, id, car, plate) {
             document.getElementById('mdName').innerText = name; document.getElementById('mdID').innerText = id;
