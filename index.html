@@ -12,6 +12,7 @@
             --card: #1e293b; 
             --blue: #3b82f6; 
             --amber: #fbbc04; 
+            --red: #ef4444;
             --slate: #94a3b8; 
             --white: #ffffff;
         }
@@ -29,7 +30,6 @@
 
         .container { width: 100%; max-width: 450px; }
 
-        /* Card Styles */
         .card { 
             background: var(--card); 
             padding: 20px; 
@@ -64,7 +64,6 @@
 
         .btn:active { transform: scale(0.98); }
 
-        /* Tabs */
         .tab-bar { display: flex; gap: 10px; margin-bottom: 20px; }
         .tab { 
             flex: 1; 
@@ -78,7 +77,6 @@
         }
         .tab.active { background: var(--blue); border-color: var(--blue); font-weight: bold; }
 
-        /* Booking Items */
         .booking-item { 
             background: rgba(255,255,255,0.05); 
             padding: 15px; 
@@ -100,9 +98,8 @@
         .pending { background: #475569; }
         .accepted { background: #22c55e; }
 
-        /* Chat */
         #chatBox { 
-            height: 150px; 
+            height: 180px; 
             overflow-y: auto; 
             background: #0f172a; 
             padding: 10px; 
@@ -111,6 +108,7 @@
             display: flex; 
             flex-direction: column; 
             gap: 8px; 
+            border: 1px solid #334155;
         }
         .msg { padding: 8px 12px; border-radius: 10px; max-width: 80%; font-size: 0.85rem; }
         .msg.me { align-self: flex-end; background: var(--blue); }
@@ -160,22 +158,34 @@
     </div>
 
     <script>
-        // CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyCU3QzjiDpL4U3825XtERth6PFlJ1tsZtg",
             authDomain: "carpool-uitm.firebaseapp.com",
             databaseURL: "https://carpool-uitm-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "carpool-uitm",
-            storageBucket: "carpool-uitm.firebasestorage.app",
-            messagingSenderId: "571429884753",
-            appId: "1:571429884753:web:a02c09a1818a09b77b3970"
+            projectId: "carpool-uitm"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
         let currentUser = JSON.parse(localStorage.getItem('sego_user'));
 
-        // LOGIN LOGIC
+        // --- BANNED LOGIC ---
+        function checkBanStatus() {
+            const bannedUntil = localStorage.getItem('sego_banned_until');
+            if (bannedUntil) {
+                if (Date.now() < bannedUntil) {
+                    const diff = Math.ceil((bannedUntil - Date.now()) / 60000);
+                    alert(`Action Denied! You are banned for ${diff} more minutes.`);
+                    return true;
+                } else {
+                    localStorage.removeItem('sego_banned_until');
+                    localStorage.setItem('cancel_count', 0);
+                }
+            }
+            return false;
+        }
+
+        // LOGIN/LOGOUT
         function login() {
             const id = document.getElementById('stuID').value.trim();
             const name = document.getElementById('stuName').value.trim();
@@ -184,11 +194,7 @@
             localStorage.setItem('sego_user', JSON.stringify(currentUser));
             location.reload();
         }
-
-        function logout() {
-            localStorage.removeItem('sego_user');
-            location.reload();
-        }
+        function logout() { localStorage.removeItem('sego_user'); location.reload(); }
 
         if(currentUser) {
             document.getElementById('loginArea').style.display = 'none';
@@ -206,16 +212,14 @@
 
         // DATA SYNC
         function syncData() {
-            // 1. DRIVER LIST (With Undefined Filter)
+            // 1. Instant Ride Logic
             db.ref('drivers').on('value', (snapshot) => {
                 const data = snapshot.val();
                 let html = "";
                 let myBookedId = localStorage.getItem('booked_driver_id');
 
                 if (data) {
-                    // THE FIX: Filter out nulls and incomplete data objects
                     const drivers = Object.values(data).filter(d => d && typeof d === 'object' && d.name && d.car);
-
                     const activeTrip = drivers.find(d => d.id === myBookedId && d.status === 'BOOKED');
 
                     if (activeTrip) {
@@ -225,7 +229,10 @@
                             <p>Driver: <b>${activeTrip.name}</b> (${activeTrip.car})</p>
                             <div id="chatBox"></div>
                             <input type="text" id="chatInput" class="input-field" placeholder="Message driver...">
-                            <button class="btn" style="background:#475569; margin-top:10px;" onclick="finishTrip('${activeTrip.id}')">FINISH TRIP</button>
+                            <div style="display:flex; gap:10px;">
+                                <button class="btn" style="background:#475569;" onclick="finishTrip('${activeTrip.id}')">FINISH TRIP</button>
+                                <button class="btn" style="background:var(--red);" onclick="cancelInstantTrip('${activeTrip.id}')">CANCEL</button>
+                            </div>
                         </div>`;
                         loadChats(activeTrip.id);
                     } else {
@@ -238,7 +245,7 @@
                                     <div style="color:var(--slate); font-size:0.85rem; margin-bottom:12px;">${d.car} • [${d.plate || 'N/A'}]</div>
                                     <div style="display:flex; gap:10px;">
                                         <button class="btn" onclick="bookNow('${d.id}')">BOOK NOW</button>
-                                        <button class="btn" style="background:#475569" onclick="alert('Rating: '+ (d.rating || 5))">INFO</button>
+                                        <button class="btn" style="background:#475569" onclick="showInfo('${d.id}')">INFO</button>
                                     </div>
                                 </div>`;
                             }
@@ -248,19 +255,30 @@
                 document.getElementById('driverList').innerHTML = html || "<p style='text-align:center; color:var(--slate); margin-top:50px;'>No drivers online.</p>";
             });
 
-            // 2. MY PRE-BOOKINGS
+            // 2. Pre-Bookings Logic
             db.ref('bookings').on('value', snap => {
                 let html = "";
                 snap.forEach(child => {
                     const b = child.val();
+                    const bid = child.key;
                     if(b.student_id === currentUser.id) {
+                        let btnSection = "";
+                        if(b.status === "PENDING") {
+                            btnSection = `<button onclick="cancelBooking('${bid}')" style="background:var(--red); color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; font-size:0.7rem;">CANCEL</button>`;
+                        } else if(b.status === "ACCEPTED") {
+                            btnSection = `<button onclick="alert('Trip accepted! Open shared chat for ID: ${bid}')" style="background:var(--blue); color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; font-size:0.7rem;">CHAT</button>`;
+                        }
+
                         html += `
                         <div class="booking-item">
                             <div>
                                 <b>${b.date} • ${b.time}</b><br>
                                 <small>To: ${b.dest}</small>
                             </div>
-                            <span class="status-pill ${b.status.toLowerCase()}">${b.status}</span>
+                            <div style="text-align:right;">
+                                <div class="status-pill ${b.status.toLowerCase()}">${b.status}</div>
+                                <div style="margin-top:5px;">${btnSection}</div>
+                            </div>
                         </div>`;
                     }
                 });
@@ -268,22 +286,54 @@
             });
         }
 
-        // ACTIONS
-        async function bookNow(id) {
-            if(!confirm("Book this driver?")) return;
-            localStorage.setItem('booked_driver_id', id);
-            await db.ref('drivers/' + id).update({ status: 'BOOKED' });
+        // INFO DRIVER FIX
+        async function showInfo(id) {
+            const snap = await db.ref('drivers/' + id).get();
+            if(snap.exists()) {
+                const d = snap.val();
+                alert(`DRIVER PROFILE\n---------------\nName: ${d.name}\nCar: ${d.car}\nPlate: ${d.plate}\nStatus: ${d.status}\nRating: ⭐ ${d.rating || '5.0'}`);
+            } else {
+                alert("Driver details not found.");
+            }
         }
 
-        async function finishTrip(id) {
-            if(confirm("End trip?")) {
+        // CANCEL LOGIC & BANNED
+        function applyCancelStrike() {
+            let count = parseInt(localStorage.getItem('cancel_count') || 0);
+            count++;
+            localStorage.setItem('cancel_count', count);
+            if(count >= 3) {
+                const banTime = Date.now() + (10 * 60 * 1000);
+                localStorage.setItem('sego_banned_until', banTime);
+                alert("BANNED! You cancelled 3 times. Please wait 10 minutes.");
+            }
+        }
+
+        async function cancelInstantTrip(id) {
+            if(confirm("Cancel this ride? Strike will be added.")) {
+                applyCancelStrike();
                 await db.ref('chats/' + id).remove();
                 await db.ref('drivers/' + id).update({ status: 'ON' });
                 localStorage.removeItem('booked_driver_id');
             }
         }
 
+        async function cancelBooking(bid) {
+            if(confirm("Cancel this pre-book request?")) {
+                applyCancelStrike();
+                await db.ref('bookings/' + bid).remove();
+            }
+        }
+
+        async function bookNow(id) {
+            if(checkBanStatus()) return;
+            if(!confirm("Book this driver?")) return;
+            localStorage.setItem('booked_driver_id', id);
+            await db.ref('drivers/' + id).update({ status: 'BOOKED' });
+        }
+
         async function submitBooking() {
+            if(checkBanStatus()) return;
             const date = document.getElementById('bookDate').value;
             const time = document.getElementById('bookTime').value;
             const dest = document.getElementById('bookDest').value;
@@ -298,18 +348,29 @@
             alert("Booking request sent!");
         }
 
+        function finishTrip(id) {
+            if(confirm("End trip?")) {
+                db.ref('chats/' + id).remove();
+                db.ref('drivers/' + id).update({ status: 'ON' });
+                localStorage.removeItem('booked_driver_id');
+            }
+        }
+
         function loadChats(id) {
             db.ref('chats/'+id).on('value', s => {
-                let h = ""; s.forEach(m => { h += `<div class="msg ${m.val().sender==='student'?'me':'them'}">${m.val().text}</div>`; });
+                let h = ""; 
+                s.forEach(m => { 
+                    h += `<div class="msg ${m.val().sender==='student'?'me':'them'}">${m.val().text}</div>`; 
+                });
                 const box = document.getElementById('chatBox');
                 if(box) { box.innerHTML = h; box.scrollTop = box.scrollHeight; }
             });
-            // Send chat on Enter key
+
             document.body.onkeypress = function(e) {
                 if(e.key === 'Enter' && document.activeElement.id === 'chatInput') {
                     const val = document.getElementById('chatInput').value;
                     if(val) {
-                        db.ref('chats/'+id).push({sender:'student', text:val});
+                        db.ref('chats/'+id).push({sender:'student', text:val, timestamp: Date.now()});
                         document.getElementById('chatInput').value = "";
                     }
                 }
