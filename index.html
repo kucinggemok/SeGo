@@ -75,6 +75,7 @@
         }
         .btn:active { transform: scale(0.98); }
 
+        /* Driver Registration Overlay */
         #driverRegOverlay { position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); z-index:20000; display:none; flex-direction:column; padding:20px; box-sizing:border-box; overflow-y:auto; }
 
         .tab-bar { display: flex; gap: 8px; margin-bottom: 20px; width: 100%; background: #1e293b; padding: 6px; border-radius: 8px; border: 1px solid var(--border); box-sizing: border-box; }
@@ -98,8 +99,10 @@
         .bubble.me { align-self: flex-end; background: var(--blue); }
         .bubble.them { align-self: flex-start; background: #334155; }
         
+        /* Modals for Rating & Feedback */
         #ratingModal, #generalFeedbackModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
         
+        /* Star Rating System */
         .stars { display: flex; justify-content: center; gap: 10px; margin: 20px 0; flex-direction: row-reverse; }
         .stars input { display: none; }
         .stars label { font-size: 35px; color: #334155; cursor: pointer; transition: 0.2s; }
@@ -137,7 +140,7 @@
                 <label>Full Name</label>
                 <input type="text" id="regName" class="input-field" placeholder="As Per Matrix">
                 <label>Phone Number</label>
-                <input type="text" id="regPhone" class="input-field" placeholder="0123456789">
+                <input type="text" id="regPhone" class="input-field" placeholder="Phone Number">
                 <button class="btn" style="background: var(--green);" onclick="register()">Create Account</button>
                 <p style="text-align:center; font-size:0.85rem; margin-top:15px; color:var(--slate);">
                     Already have account? <span style="color:var(--blue); cursor:pointer; font-weight:600;" onclick="toggleAuth()">Login</span>
@@ -172,13 +175,11 @@
                     <input type="text" id="insDestOther" class="input-field" style="display:none;" placeholder="Destination name?">
 
                     <label>Number of Pax:</label>
-                    <div style="display: flex; gap:10px; margin: 15px 0; flex-wrap: wrap;">
+                    <div style="display: flex; gap:10px; margin: 15px 0;">
                         <button class="pax-btn active" id="pax1" onclick="setPax(1)">1</button>
                         <button class="pax-btn" id="pax2" onclick="setPax(2)">2</button>
                         <button class="pax-btn" id="pax3" onclick="setPax(3)">3</button>
                         <button class="pax-btn" id="pax4" onclick="setPax(4)">4</button>
-                        <button class="pax-btn" id="pax5" onclick="setPax(5)">5</button>
-                        <button class="pax-btn" id="pax6" onclick="setPax(6)">6</button>
                     </div>
                     <button class="btn" onclick="findDriver()">FIND DRIVER</button>
                 </div>
@@ -198,6 +199,7 @@
                         <input type="date" id="bookDate" class="input-field">
                         <input type="time" id="bookTime" class="input-field">
                     </div>
+                    
                     <label>From:</label>
                     <select id="bookPick" class="input-field" onchange="toggleOther('bookPick')">
                         <option value="UiTM">UiTM</option><option value="US Sentral">US Sentral</option><option value="OS Sentral">OS Sentral</option><option value="KTM/Stesen Bas">KTM/Stesen Bas</option><option value="Others">Others</option>
@@ -209,6 +211,7 @@
                         <option value="US Sentral">US Sentral</option><option value="UiTM">UiTM</option><option value="OS Sentral">OS Sentral</option><option value="KTM/Stesen Bas">KTM/Stesen Bas</option><option value="Others">Others</option>
                     </select>
                     <input type="text" id="bookDestOther" class="input-field" style="display:none;" placeholder="Specify destination">
+
                     <button class="btn" style="background:var(--green);" onclick="submitBooking()">POST BOOKING</button>
                 </div>
                 <div id="myBookingsList"></div>
@@ -221,11 +224,9 @@
             <h2 style="text-align:center; margin-bottom:25px;">Driver Application</h2>
             <div class="card">
                 <label>Full Name</label>
-                <input type="text" id="dRegName" class="input-field" placeholder="Nama Penuh (Ikut Kad Matrik)">
-                <label>Username</label>
-                <input type="text" id="dRegUser" class="input-field" placeholder="Username Pilihan">
-                <label>Student ID</label>
-                <input type="text" id="dRegStuID" class="input-field" placeholder="E.g. 2023123456">
+                <input type="text" id="dRegName" class="input-field" placeholder="Full Name">
+                <label>Student ID (Username)</label>
+                <input type="text" id="dRegUser" class="input-field" placeholder="E.g. 2023123456">
                 <label>Password</label>
                 <input type="password" id="dRegPass" class="input-field" placeholder="Min 6 characters">
                 <label>Car Model & Color</label>
@@ -234,6 +235,7 @@
                 <input type="text" id="dRegPlate" class="input-field" placeholder="ABC 1234">
                 <label>Phone Number (WhatsApp)</label>
                 <input type="text" id="dRegPhone" class="input-field" placeholder="0123456789">
+                
                 <button class="btn" onclick="submitDriverApp()">SUBMIT APPLICATION</button>
                 <button class="btn" style="background:transparent; color:var(--slate); border:1px solid var(--border);" onclick="closeDriverReg()">CANCEL</button>
             </div>
@@ -242,7 +244,8 @@
 
     <div id="generalFeedbackModal">
         <div class="modal-content" style="text-align: center;">
-            <h2>App Feedback</h2>
+            <h2 style="margin: 0 0 10px 0;">App Feedback</h2>
+            <p style="color: var(--slate); font-size: 0.9rem;">Help us improve SeGo by sharing your experience or reporting an issue.</p>
             <div class="stars">
                 <input type="radio" id="g5" name="g_rating" value="5"><label for="g5">★</label>
                 <input type="radio" id="g4" name="g_rating" value="4"><label for="g4">★</label>
@@ -258,7 +261,8 @@
 
     <div id="ratingModal">
         <div class="modal-content" style="text-align: center;">
-            <h2>Trip Completed</h2>
+            <h2 style="margin: 0 0 10px 0;">Trip Completed</h2>
+            <p style="color: var(--slate); font-size: 0.9rem;">Rate your driver to keep the SeGo community reliable.</p>
             <div class="stars">
                 <input type="radio" id="s5" name="rating" value="5"><label for="s5">★</label>
                 <input type="radio" id="s4" name="rating" value="4"><label for="s4">★</label>
@@ -266,14 +270,14 @@
                 <input type="radio" id="s2" name="rating" value="2"><label for="s2">★</label>
                 <input type="radio" id="s1" name="rating" value="1"><label for="s1">★</label>
             </div>
-            <textarea id="rateFeedback" rows="3" placeholder="Anything to add?"></textarea>
+            <textarea id="rateFeedback" rows="3" placeholder="Anything to add? (Optional)"></textarea>
             <button class="btn" onclick="submitTripRating()">Submit Review</button>
         </div>
     </div>
 
     <div id="infoModal">
         <div class="modal-content">
-            <h3>Driver Information</h3>
+            <h3 style="margin-bottom:20px;">Driver Information</h3>
             <div class="info-row"><span>Name</span><b id="mdName"></b></div>
             <div class="info-row"><span>Driver ID</span><b id="mdID"></b></div>
             <div class="info-row"><span>Car</span><b id="mdCar"></b></div>
@@ -315,6 +319,7 @@
             loadMyBookings();
         }
 
+        // --- AUTH & REGISTRATION ---
         function toggleAuth() {
             const login = document.getElementById('loginArea');
             const register = document.getElementById('registerArea');
@@ -326,7 +331,7 @@
             const id = document.getElementById('regID').value.trim();
             const name = document.getElementById('regName').value.trim().toUpperCase();
             const phone = document.getElementById('regPhone').value.trim();
-            if(id.length < 5 || name.length < 3 || !phone) return alert("Please fill all details correctly!");
+            if(id.length < 5 || name.length < 3) return alert("Please fill all details correctly!");
             const check = await db.ref('students/' + id).get();
             if(check.exists()) return alert("This ID is already registered!");
             await db.ref('students/' + id).set({ name: name, phone: phone });
@@ -342,65 +347,52 @@
                 const data = snap.val();
                 localStorage.setItem('sego_user', JSON.stringify({id: id, name: data.name}));
                 location.reload();
-            } else { 
-                alert("ID not found. If you are a Driver, please wait for admin approval. If Rider, please register first!"); 
-            }
+            } else { alert("ID not found. Please register first!"); }
         }
 
+        // --- DRIVER REGISTRATION LOGIC ---
         function openDriverReg() { document.getElementById('driverRegOverlay').style.display = 'flex'; }
         function closeDriverReg() { document.getElementById('driverRegOverlay').style.display = 'none'; }
-        
         async function submitDriverApp() {
-            try {
-                const name = document.getElementById('dRegName').value.trim().toUpperCase();
-                const user = document.getElementById('dRegUser').value.trim().toLowerCase();
-                const stuID = document.getElementById('dRegStuID').value.trim();
-                const pass = document.getElementById('dRegPass').value.trim();
-                const car = document.getElementById('dRegCar').value.trim();
-                const plate = document.getElementById('dRegPlate').value.trim().toUpperCase();
-                const phone = document.getElementById('dRegPhone').value.trim();
+            const name = document.getElementById('dRegName').value.trim().toUpperCase();
+            const user = document.getElementById('dRegUser').value.trim();
+            const pass = document.getElementById('dRegPass').value.trim();
+            const car = document.getElementById('dRegCar').value.trim();
+            const plate = document.getElementById('dRegPlate').value.trim().toUpperCase();
+            const phone = document.getElementById('dRegPhone').value.trim();
 
-                if(!name || !user || !stuID || pass.length < 6 || !car || !plate || !phone) {
-                    return alert("Please fill ALL details! (Password min 6 chars)");
-                }
+            if(!name || !user || pass.length < 6 || !car || !plate || !phone) return alert("Sila isi semua maklumat dengan betul (Password min 6 char)!");
 
-                const checkPending = await db.ref('driver_pending/' + user).get();
-                if (checkPending.exists()) {
-                    return alert("This username is already in process. Please wait.");
-                }
-
-                await db.ref('driver_pending/' + user).set({
-                    name: name,
-                    username: user,
-                    student_id: stuID,
-                    password: pass,
-                    car: car,
-                    plate: plate,
-                    phone: String(phone),
-                    status: 'PENDING',
-                    appliedAt: Date.now()
-                });
-
-                alert("Application Sent! Please wait for admin approval.");
-                closeDriverReg();
-                document.querySelectorAll('#driverRegOverlay input').forEach(i => i.value = '');
-                
-            } catch (e) {
-                console.error("Error:", e);
-                alert("System Error: " + e.message);
-            }
+            await db.ref('driver_pending/' + user).set({
+                name: name, username: user, password: pass, car: car, plate: plate, phone: phone, appliedAt: Date.now()
+            });
+            alert("Application Sent! Sila tunggu admin hubungi anda untuk pengesahan.");
+            closeDriverReg();
         }
 
+        // --- GENERAL FEEDBACK LOGIC ---
         function openGeneralFeedback() { document.getElementById('generalFeedbackModal').style.display = 'flex'; }
         function closeGeneralFeedback() { document.getElementById('generalFeedbackModal').style.display = 'none'; }
         async function submitGeneralFeedback() {
             const rating = document.querySelector('input[name="g_rating"]:checked')?.value;
             const comment = document.getElementById('g_comment').value.trim();
+            
             if(!rating) return alert("Please select a star rating");
-            await db.ref('feedbacks/app_general').push({ student_name: currentUser ? currentUser.name : "Anonymous", rating: rating, comment: comment, timestamp: Date.now() });
-            alert("Thank you!"); closeGeneralFeedback();
+
+            await db.ref('feedbacks/app_general').push({
+                student_name: currentUser ? currentUser.name : "Anonymous",
+                rating: rating,
+                comment: comment,
+                timestamp: Date.now()
+            });
+
+            alert("Thank you! Your feedback has been submitted.");
+            closeGeneralFeedback();
+            document.getElementById('g_comment').value = '';
+            document.querySelector('input[name="g_rating"]:checked').checked = false;
         }
 
+        // --- CORE FUNCTIONS ---
         function setPax(n) { selectedPax = n; document.querySelectorAll('.pax-btn').forEach(b => b.classList.remove('active')); document.getElementById('pax'+n).classList.add('active'); }
         function logout() { localStorage.clear(); location.reload(); }
         function showTab(t) { document.getElementById('sectionInstant').style.display = t === 'instant' ? 'block' : 'none'; document.getElementById('sectionBooking').style.display = t === 'booking' ? 'block' : 'none'; document.getElementById('btnInstant').classList.toggle('active', t === 'instant'); document.getElementById('btnBooking').classList.toggle('active', t === 'booking'); }
@@ -435,30 +427,15 @@
             document.getElementById('searchingState').style.display = s === 'SEARCHING' ? 'block' : 'none';
             const area = document.getElementById('activeTripState');
             area.style.display = s === 'ACCEPTED' ? 'block' : 'none';
-            
             if(s === 'ACCEPTED' && data) {
-                const displayID = data.driver_id ? data.driver_id.toUpperCase() : "N/A";
-                area.innerHTML = `
-                <div class="card" style="border-left:4px solid var(--green)">
-                    <h4>Driver Found</h4>
-                    <p><b>${data.driver_name}</b> is on the way.</p>
-                    <button class="btn" onclick="openInfo('${data.driver_name}','${displayID}','${data.driver_car}','${data.driver_plate||'N/A'}')">DRIVER INFO</button>
+                area.innerHTML = `<div class="card" style="border-left:4px solid var(--green)">
+                    <h4 style="margin-bottom:5px;">Driver Found</h4><p style="color:var(--slate); font-size:0.9rem; margin-top:0;"><b>${data.driver_name}</b> is on the way.</p>
+                    <button class="btn" style="background:transparent; border:1px solid var(--border); color:var(--white);" onclick="openInfo('${data.driver_name}','${data.driver_id}','${data.driver_car}','${data.driver_plate||'N/A'}')">DRIVER INFO</button>
                     <button class="btn" onclick="openChatBox('${activeReqId}','${data.driver_name}')">CHAT DRIVER</button>
                     <button class="btn" style="background:var(--white); color:var(--bg);" onclick="finishTripManual()">FINISH TRIP</button>
                 </div>`;
             }
         }
-
-        async function finishTripManual() {
-            if(confirm("Arrived at destination? Click OK to rate.")) {
-                try {
-                    await db.ref('open_requests/' + activeReqId).update({ status: 'COMPLETED' });
-                } catch (e) {
-                    console.error(e);
-                    alert("Failed to complete trip.");
-                }
-            }
-        }   
 
         function openInfo(name, id, car, plate) {
             document.getElementById('mdName').innerText = name; document.getElementById('mdID').innerText = id;
@@ -470,9 +447,19 @@
             const rating = document.querySelector('input[name="rating"]:checked')?.value;
             const comment = document.getElementById('rateFeedback').value.trim();
             const drvId = localStorage.getItem('pending_rating_id');
-            if(!rating) return alert("Please select rating");
-            if(drvId) { await db.ref('feedbacks/' + drvId).push({ student_name: currentUser.name, rating: rating, comment: comment, timestamp: Date.now() }); }
-            if(activeReqId) { await db.ref('open_requests/' + activeReqId).remove(); }
+
+            if(!rating) return alert("Please select a star rating");
+
+            if(drvId) { 
+                await db.ref('feedbacks/' + drvId).push({ 
+                    student_name: currentUser.name, 
+                    rating: rating, 
+                    comment: comment, 
+                    timestamp: Date.now() 
+                }); 
+            }
+            if(activeReqId) { await db.ref('open_requests/' + activeReqId).remove(); await db.ref('chats/' + activeReqId).remove(); }
+            
             localStorage.removeItem('active_request_id');
             localStorage.removeItem('pending_rating_id');
             location.reload();
@@ -491,14 +478,19 @@
             const i = document.getElementById('chatInput'); if(!i.value.trim()) return;
             await db.ref('chats/' + currentChatId).push({ sender: 'student', text: i.value }); i.value = "";
         }
-        async function cancelRequest() { if(confirm("Cancel?")) { await db.ref('open_requests/' + activeReqId).remove(); localStorage.removeItem('active_request_id'); location.reload(); } }
-        
+        async function cancelRequest() { if(confirm("Cancel this request?")) { await db.ref('open_requests/' + activeReqId).remove(); localStorage.removeItem('active_request_id'); location.reload(); } }
+        async function cancelBooking(bid) { if(confirm("Cancel this booking?")) { await db.ref('bookings/' + bid).remove(); } }
+        async function finishTripManual() {
+            const snap = await db.ref('open_requests/' + activeReqId).get();
+            if(snap.exists()) { localStorage.setItem('pending_rating_id', snap.val().driver_id); await db.ref('open_requests/' + activeReqId).update({ status: 'COMPLETED' }); }
+        }
+
         async function submitBooking() {
             const d = document.getElementById('bookDate').value; const t = document.getElementById('bookTime').value;
             const p = getVal('bookPick'); const ds = getVal('bookDest');
-            if(!d || !t || !p || !ds) return alert("Fill all details");
+            if(!d || !t || !p || !ds) return alert("Please fill all details");
             await db.ref('bookings').push({ student_id: currentUser.id, student_name: currentUser.name, date: d, time: t, pickup: p, dest: ds, status: 'PENDING' });
-            alert("Booking Posted!");
+            alert("Booking Posted to Board!");
         }
 
         function loadMyBookings() {
@@ -508,15 +500,16 @@
                     if(b.student_id === currentUser.id) {
                         const isAcc = b.status === 'ACCEPTED';
                         h += `<div class="booking-item ${isAcc ? 'status-accepted' : ''}">
-                            <b>${b.pickup} ➔ ${b.dest}</b><br>
-                            <small>${b.date} | ${b.time} | <b>${b.status}</b></small><br>
-                            ${isAcc ? `<button class="btn" style="padding:10px;" onclick="openChatBox('${c.key}', '${b.driver_name}')">CHAT</button>` : `<button class="btn" style="background:red; padding:10px;" onclick="db.ref('bookings/${c.key}').remove()">CANCEL</button>`}
+                            <b style="font-size:0.95rem;">${b.pickup} ➔ ${b.dest}</b><br>
+                            <small style="color:var(--slate);">${b.date} | ${b.time} | <span style="color:${isAcc ? 'var(--green)' : 'var(--amber)'}; font-weight:600;">${b.status}</span></small><br>
+                            ${isAcc ? `<button class="btn" style="padding:10px; font-size:0.85rem; margin-top:12px;" onclick="openChatBox('${c.key}', '${b.driver_name}')">CHAT DRIVER</button>` : 
+                            `<button class="btn" style="background:transparent; border:1px solid var(--red); color:var(--red); padding:10px; font-size:0.85rem; margin-top:12px;" onclick="cancelBooking('${c.key}')">CANCEL</button>`}
                         </div>`;
                     }
                 });
-                document.getElementById('myBookingsList').innerHTML = h;
+                document.getElementById('myBookingsList').innerHTML = h || "<p style='text-align:center; color:var(--slate); font-size:0.9rem;'>No bookings yet.</p>";
             });
         }
-    </script>
+ </script>
 </body>
 </html>
