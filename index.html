@@ -12,6 +12,11 @@
         .container { width: 100%; max-width: 450px; }
         .card { background: var(--card); padding: 20px; border-radius: 15px; margin-bottom: 15px; border: 1px solid #334155; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
         .input-field { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; }
+        
+        /* PAKSA HURUF BESAR KAT INPUT REGISTER NAME */
+        #regName { text-transform: uppercase; }
+        #regName::placeholder { text-transform: none; }
+
         label { font-size: 0.8rem; color: var(--slate); margin-top: 5px; display: block; }
         .btn { width: 100%; padding: 14px; background: var(--blue); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.2s; }
         .btn:active { transform: scale(0.98); }
@@ -54,7 +59,7 @@
             <h1 style="text-align: center;">Register SeGo</h1>
             <div class="card">
                 <input type="text" id="regID" class="input-field" placeholder="Student ID (10 Digits)">
-                <input type="text" id="regName" class="input-field" placeholder="Full Name">
+                <input type="text" id="regName" class="input-field" placeholder="FULL NAME (AS PER MATRIX)">
                 <input type="text" id="regPhone" class="input-field" placeholder="Phone Number">
                 <button class="btn" style="background: var(--green);" onclick="register()">Create Account</button>
                 <p style="text-align:center; font-size:0.8rem; cursor:pointer; color:var(--blue);" onclick="toggleAuth()">Already have account? Login</p>
@@ -190,6 +195,7 @@
 
         async function register() {
             const id = document.getElementById('regID').value.trim();
+            // LENGKAP: PAKSA .toUpperCase() UNTUK DATABASE
             const name = document.getElementById('regName').value.trim().toUpperCase();
             const phone = document.getElementById('regPhone').value.trim();
 
@@ -217,29 +223,12 @@
             }
         }
 
-        // --- CORE APP LOGIC ---
-        function setPax(n) {
-            selectedPax = n;
-            document.querySelectorAll('.pax-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('pax'+n).classList.add('active');
-        }
-
+        // --- CORE FUNCTIONS (REMAINING THE SAME) ---
+        function setPax(n) { selectedPax = n; document.querySelectorAll('.pax-btn').forEach(b => b.classList.remove('active')); document.getElementById('pax'+n).classList.add('active'); }
         function logout() { localStorage.clear(); location.reload(); }
-        function showTab(t) {
-            document.getElementById('sectionInstant').style.display = t === 'instant' ? 'block' : 'none';
-            document.getElementById('sectionBooking').style.display = t === 'booking' ? 'block' : 'none';
-            document.getElementById('btnInstant').classList.toggle('active', t === 'instant');
-            document.getElementById('btnBooking').classList.toggle('active', t === 'booking');
-        }
-
-        function toggleOther(id) {
-            const val = document.getElementById(id).value;
-            document.getElementById(id + 'Other').style.display = (val === 'Others') ? 'block' : 'none';
-        }
-        function getVal(id) {
-            const main = document.getElementById(id).value;
-            return (main === 'Others') ? document.getElementById(id + 'Other').value : main;
-        }
+        function showTab(t) { document.getElementById('sectionInstant').style.display = t === 'instant' ? 'block' : 'none'; document.getElementById('sectionBooking').style.display = t === 'booking' ? 'block' : 'none'; document.getElementById('btnInstant').classList.toggle('active', t === 'instant'); document.getElementById('btnBooking').classList.toggle('active', t === 'booking'); }
+        function toggleOther(id) { const val = document.getElementById(id).value; document.getElementById(id + 'Other').style.display = (val === 'Others') ? 'block' : 'none'; }
+        function getVal(id) { const main = document.getElementById(id).value; return (main === 'Others') ? document.getElementById(id + 'Other').value : main; }
 
         async function findDriver() {
             const p = getVal('insPick'); const d = getVal('insDest');
@@ -280,22 +269,15 @@
         }
 
         function openInfo(name, id, car, plate) {
-            document.getElementById('mdName').innerText = name;
-            document.getElementById('mdID').innerText = id;
-            document.getElementById('mdCar').innerText = car;
-            document.getElementById('mdPlate').innerText = plate;
+            document.getElementById('mdName').innerText = name; document.getElementById('mdID').innerText = id;
+            document.getElementById('mdCar').innerText = car; document.getElementById('mdPlate').innerText = plate;
             document.getElementById('infoModal').style.display = 'flex';
         }
 
         async function submitRating() {
             const drvId = localStorage.getItem('pending_rating_id');
-            if(drvId) {
-                await db.ref('drivers/' + drvId + '/feedbacks').push({ rating: document.getElementById('rateValue').value, comment: document.getElementById('rateFeedback').value, student: currentUser.name, date: new Date().toLocaleDateString() });
-            }
-            if(activeReqId) {
-                await db.ref('open_requests/' + activeReqId).remove();
-                await db.ref('chats/' + activeReqId).remove();
-            }
+            if(drvId) { await db.ref('drivers/' + drvId + '/feedbacks').push({ rating: document.getElementById('rateValue').value, comment: document.getElementById('rateFeedback').value, student: currentUser.name, date: new Date().toLocaleDateString() }); }
+            if(activeReqId) { await db.ref('open_requests/' + activeReqId).remove(); await db.ref('chats/' + activeReqId).remove(); }
             localStorage.removeItem('active_request_id');
             location.reload();
         }
@@ -315,7 +297,6 @@
         }
         async function cancelRequest() { if(confirm("Cancel this request?")) { await db.ref('open_requests/' + activeReqId).remove(); localStorage.removeItem('active_request_id'); location.reload(); } }
         async function cancelBooking(bid) { if(confirm("Cancel this booking?")) { await db.ref('bookings/' + bid).remove(); } }
-        
         async function finishTripManual() {
             const snap = await db.ref('open_requests/' + activeReqId).get();
             if(snap.exists()) { localStorage.setItem('pending_rating_id', snap.val().driver_id); await db.ref('open_requests/' + activeReqId).update({ status: 'COMPLETED' }); }
