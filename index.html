@@ -41,15 +41,6 @@
         }
         .tab.active { background: var(--blue); font-weight: bold; }
 
-        .booking-item { 
-            background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; 
-            margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--slate);
-        }
-
-        .status-pill { padding: 4px 10px; border-radius: 5px; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; }
-        .pending { background: #475569; }
-        .accepted { background: #22c55e; }
-
         /* Modal / Panel */
         #chatPanel, #ratingModal, #infoModal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -57,12 +48,20 @@
         }
         .modal-box { background: var(--card); width: 85%; padding: 25px; border-radius: 20px; text-align: center; border: 1px solid var(--blue); }
         
-        #chatPanel { flex-direction: column; background: var(--bg); }
+        #chatPanel { flex-direction: column; background: var(--bg); display: none; }
         .chat-header { background: var(--blue); padding: 20px; width: 100%; display: flex; align-items: center; box-sizing: border-box; }
         #chatMessages { flex: 1; padding: 20px; width: 100%; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; box-sizing: border-box; }
         .bubble { padding: 10px 15px; border-radius: 15px; max-width: 75%; }
         .bubble.me { align-self: flex-end; background: var(--blue); }
         .bubble.them { align-self: flex-start; background: #334155; }
+
+        .booking-item { 
+            background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; 
+            margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--slate);
+        }
+        .status-pill { padding: 4px 10px; border-radius: 5px; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; }
+        .pending { background: #475569; }
+        .accepted { background: #22c55e; }
     </style>
 </head>
 <body>
@@ -120,8 +119,8 @@
 
     <div id="ratingModal">
         <div class="modal-box">
-            <h2>Trip Completed!</h2>
-            <p>Rate your driver:</p>
+            <h2>Trip Ended!</h2>
+            <p>Please rate your experience:</p>
             <select id="rateValue" class="input-field" style="text-align: center; font-size: 1.2rem;">
                 <option value="5">⭐⭐⭐⭐⭐ (5/5)</option>
                 <option value="4">⭐⭐⭐⭐ (4/5)</option>
@@ -130,7 +129,7 @@
                 <option value="1">⭐ (1/5)</option>
             </select>
             <input type="text" id="rateFeedback" class="input-field" placeholder="Any feedback?">
-            <button class="btn" onclick="submitRating()">Submit & Finish</button>
+            <button class="btn" onclick="submitRating()">Submit Rating</button>
         </div>
     </div>
 
@@ -157,26 +156,6 @@
 
         let currentUser = JSON.parse(localStorage.getItem('sego_user'));
         let activeChatId = null;
-
-        // BAN LOGIC
-        function checkBanStatus() {
-            const until = localStorage.getItem('sego_banned_until');
-            if (until && Date.now() < until) {
-                const rem = Math.ceil((until - Date.now()) / 60000);
-                alert(`You are banned for ${rem} minutes.`);
-                return true;
-            }
-            return false;
-        }
-
-        function applyStrike() {
-            let strikes = parseInt(localStorage.getItem('cancel_count') || 0) + 1;
-            localStorage.setItem('cancel_count', strikes);
-            if (strikes >= 3) {
-                localStorage.setItem('sego_banned_until', Date.now() + 600000);
-                alert("BANNED! 3 cancellations detected.");
-            }
-        }
 
         // AUTH
         function login() {
@@ -210,19 +189,27 @@
                 let bookedId = localStorage.getItem('booked_driver_id');
 
                 if(drivers) {
-                    const activeTrip = Object.values(drivers).find(d => d && d.id === bookedId && d.status === 'BOOKED');
+                    const activeTrip = Object.values(drivers).find(d => d && d.id === bookedId);
                     
-                    if(activeTrip) {
+                    // LOGIC: Kalau trip sedang berjalan
+                    if(activeTrip && activeTrip.status === 'BOOKED') {
                         html = `<div class="card" style="border-left:5px solid var(--amber);">
-                            <h4>Trip with ${activeTrip.name}</h4>
+                            <h4>Ongoing Ride with ${activeTrip.name}</h4>
                             <div style="display:flex; flex-direction:column; gap:8px;">
                                 <button class="btn" onclick="openChatBox('${activeTrip.id}', '${activeTrip.name}')">CHAT</button>
-                                <button class="btn" style="background:var(--amber); color:black;" onclick="finishTripModal('${activeTrip.id}')">COMPLETE RIDE</button>
+                                <button class="btn" style="background:var(--amber); color:black;" onclick="finishTripManual('${activeTrip.id}')">FINISH TRIP</button>
                                 <button class="btn" style="background:var(--red);" onclick="cancelInstant('${activeTrip.id}')">CANCEL</button>
                             </div>
                         </div>`;
-                    } else {
+                    } 
+                    // LOGIC: Kalau driver dah tekan "Finish" di side dia
+                    else if (bookedId && (!activeTrip || activeTrip.status === 'ON')) {
+                        // Tunjukkan modal rating secara paksa
+                        localStorage.setItem('pending_rating_id', bookedId);
                         localStorage.removeItem('booked_driver_id');
+                        document.getElementById('ratingModal').style.display = 'flex';
+                    }
+                    else {
                         Object.values(drivers).forEach(d => {
                             if(d && d.name && d.status === "ON") {
                                 html += `<div class="card">
@@ -239,22 +226,15 @@
                 document.getElementById('driverList').innerHTML = html || "No drivers online.";
             });
 
+            // Pre-bookings sync (sama macam asal)
             db.ref('bookings').on('value', snap => {
                 let html = "";
                 snap.forEach(child => {
                     const b = child.val();
-                    const bid = child.key;
                     if(b.student_id === currentUser.id) {
-                        let act = b.status === "PENDING" 
-                            ? `<button onclick="cancelPreBook('${bid}')" style="background:var(--red); color:white; border:none; padding:5px; border-radius:5px;">CANCEL</button>`
-                            : `<button onclick="openChatBox('${bid}', 'Driver')" style="background:var(--blue); color:white; border:none; padding:5px; border-radius:5px;">CHAT</button>`;
-                        
                         html += `<div class="booking-item">
                             <div><b>${b.date} • ${b.time}</b><br><small>${b.dest}</small></div>
-                            <div style="text-align:right;">
-                                <div class="status-pill ${b.status.toLowerCase()}">${b.status}</div>
-                                <div style="margin-top:5px;">${act}</div>
-                            </div>
+                            <div class="status-pill ${b.status.toLowerCase()}">${b.status}</div>
                         </div>`;
                     }
                 });
@@ -262,7 +242,50 @@
             });
         }
 
-        // ACTIONS
+        // FINISH TRIP LOGIC
+        function finishTripManual(id) {
+            if(confirm("End this trip?")) {
+                localStorage.setItem('pending_rating_id', id);
+                db.ref('drivers/' + id).update({ status: 'ON' });
+                db.ref('chats/' + id).remove();
+                localStorage.removeItem('booked_driver_id');
+                document.getElementById('ratingModal').style.display = 'flex';
+            }
+        }
+
+        async function submitRating() {
+            const driverId = localStorage.getItem('pending_rating_id');
+            const rate = document.getElementById('rateValue').value;
+            const feedback = document.getElementById('rateFeedback').value;
+            
+            if(driverId) {
+                await db.ref('drivers/' + driverId + '/feedbacks').push({
+                    student: currentUser.name,
+                    rating: rate,
+                    comment: feedback,
+                    timestamp: Date.now()
+                });
+            }
+
+            localStorage.removeItem('pending_rating_id');
+            document.getElementById('ratingModal').style.display = 'none';
+            alert("Rating submitted! Thank you.");
+        }
+
+        async function bookInstant(id) {
+            if(!confirm("Book now?")) return;
+            localStorage.setItem('booked_driver_id', id);
+            await db.ref('drivers/' + id).update({ status: 'BOOKED' });
+        }
+
+        async function cancelInstant(id) {
+            if(confirm("Cancel ride?")) {
+                await db.ref('drivers/' + id).update({ status: 'ON' });
+                await db.ref('chats/' + id).remove();
+                localStorage.removeItem('booked_driver_id');
+            }
+        }
+
         async function showInfo(id) {
             const s = await db.ref('drivers/' + id).get();
             if(s.exists()) {
@@ -274,51 +297,6 @@
             }
         }
         function closeModal() { document.getElementById('infoModal').style.display = 'none'; }
-
-        async function bookInstant(id) {
-            if(checkBanStatus()) return;
-            if(!confirm("Book now?")) return;
-            localStorage.setItem('booked_driver_id', id);
-            await db.ref('drivers/' + id).update({ status: 'BOOKED' });
-        }
-
-        // FINISH TRIP LOGIC
-        let pendingFinishId = null;
-        function finishTripModal(id) {
-            pendingFinishId = id;
-            document.getElementById('ratingModal').style.display = 'flex';
-        }
-
-        async function submitRating() {
-            const rate = document.getElementById('rateValue').value;
-            const feedback = document.getElementById('rateFeedback').value;
-            
-            // Simpan feedback ke Driver node (optional)
-            await db.ref('drivers/' + pendingFinishId + '/feedbacks').push({
-                student: currentUser.name,
-                rating: rate,
-                comment: feedback,
-                date: Date.now()
-            });
-
-            // Reset Driver Status
-            await db.ref('drivers/' + pendingFinishId).update({ status: 'ON' });
-            await db.ref('chats/' + pendingFinishId).remove();
-            localStorage.removeItem('booked_driver_id');
-            
-            document.getElementById('ratingModal').style.display = 'none';
-            alert("Thank you for your feedback!");
-            pendingFinishId = null;
-        }
-
-        async function cancelInstant(id) {
-            if(confirm("Cancel ride? Strike added.")) {
-                applyStrike();
-                await db.ref('drivers/' + id).update({ status: 'ON' });
-                await db.ref('chats/' + id).remove();
-                localStorage.removeItem('booked_driver_id');
-            }
-        }
 
         // CHAT
         function openChatBox(id, name) {
@@ -336,7 +314,10 @@
                 box.scrollTop = box.scrollHeight;
             });
         }
-        function closeChat() { document.getElementById('chatPanel').style.display = 'none'; }
+        function closeChat() { 
+            document.getElementById('chatPanel').style.display = 'none'; 
+            if(activeChatId) db.ref('chats/' + activeChatId).off();
+        }
         function sendMsg() {
             const input = document.getElementById('chatInput');
             if(!input.value.trim() || !activeChatId) return;
