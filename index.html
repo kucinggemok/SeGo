@@ -222,9 +222,9 @@
             <div class="card">
                 <label>Full Name</label>
                 <input type="text" id="dRegName" class="input-field" placeholder="Nama Penuh (Ikut Kad Matrik)">
-                <label>Username</label>
+                <label>Username (For Login)</label>
                 <input type="text" id="dRegUser" class="input-field" placeholder="Username Pilihan">
-                <label>Student ID</label>
+                <label>Student ID (Original ID)</label>
                 <input type="text" id="dRegStuID" class="input-field" placeholder="E.g. 2023123456">
                 <label>Password</label>
                 <input type="password" id="dRegPass" class="input-field" placeholder="Min 6 characters">
@@ -352,18 +352,21 @@
             try {
                 const name = document.getElementById('dRegName').value.trim().toUpperCase();
                 const user = document.getElementById('dRegUser').value.trim();
+                const stuID = document.getElementById('dRegStuID').value.trim();
                 const pass = document.getElementById('dRegPass').value.trim();
                 const car = document.getElementById('dRegCar').value.trim();
                 const plate = document.getElementById('dRegPlate').value.trim().toUpperCase();
                 const phone = document.getElementById('dRegPhone').value.trim();
 
-                if(!name || !user || pass.length < 6 || !car || !plate || !phone) {
+                if(!name || !user || !stuID || pass.length < 6 || !car || !plate || !phone) {
                     return alert("Sila isi SEMUA maklumat!");
                 }
 
-                await db.ref('driver_pending/' + user).set({
+                // Guna stuID sebagai key supaya admin senang trace ID asal
+                await db.ref('driver_pending/' + stuID).set({
                     name: name,
                     username: user,
+                    stuID: stuID,
                     password: pass,
                     car: car,
                     plate: plate,
@@ -426,14 +429,16 @@
             area.style.display = s === 'ACCEPTED' ? 'block' : 'none';
             
             if(s === 'ACCEPTED' && data) {
-                const displayID = data.driver_id ? data.driver_id.toUpperCase() : "N/A";
+                // SINI KITA PAKSA AMBIL DRIVER ID (MATRIX ID) YANG DIHANTAR OLEH DRIVER APP
+                const displayID = data.driver_id ? String(data.driver_id).toUpperCase() : "DRIVER";
+                
                 area.innerHTML = `
                 <div class="card" style="border-left:4px solid var(--green)">
                     <h4 style="color:var(--green)">Driver Found!</h4>
                     <p><b>${data.driver_name}</b> is on the way.</p>
                     <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:6px; margin-bottom:15px;">
-                        <small style="color:var(--slate)">Vehicle:</small><br>
-                        <b>${data.driver_car} (${data.driver_plate})</b>
+                        <small style="color:var(--slate)">Driver ID:</small> <b>${displayID}</b><br>
+                        <small style="color:var(--slate)">Vehicle:</small> <b>${data.driver_car} (${data.driver_plate})</b>
                     </div>
                     <button class="btn" onclick="openInfo('${data.driver_name}','${displayID}','${data.driver_car}','${data.driver_plate||'N/A'}')">DRIVER INFO</button>
                     <button class="btn" style="background:var(--amber)" onclick="openChatBox('${activeReqId}','${data.driver_name}')">CHAT DRIVER</button>
