@@ -13,17 +13,17 @@
         .card { background: var(--card); padding: 20px; border-radius: 15px; margin-bottom: 15px; border: 1px solid #334155; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
         .input-field { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; }
         
-        /* PAKSA HURUF BESAR KAT INPUT REGISTER NAME */
-        #regName { text-transform: uppercase; }
-        #regName::placeholder { text-transform: none; }
-
+        #regName, #dRegName { text-transform: uppercase; }
         label { font-size: 0.8rem; color: var(--slate); margin-top: 5px; display: block; }
         .btn { width: 100%; padding: 14px; background: var(--blue); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.2s; }
         .btn:active { transform: scale(0.98); }
+        
+        /* Overlay Driver Registration */
+        #driverRegOverlay { position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); z-index:20000; display:none; flex-direction:column; padding:20px; box-sizing:border-box; overflow-y:auto; }
+
         .tab-bar { display: flex; gap: 10px; margin-bottom: 20px; width: 100%; }
         .tab-btn { flex: 1; padding: 10px; background: #1e293b; color: white; border: 1px solid #334155; border-radius: 10px; cursor: pointer; }
         .tab-btn.active { background: var(--blue); border-color: var(--blue); font-weight: bold; }
-        
         .pax-btn { width: 45px; height: 45px; border-radius: 50%; border: 1px solid var(--blue); background: none; color: white; cursor: pointer; }
         .pax-btn.active { background: var(--blue); font-weight: bold; }
 
@@ -53,6 +53,9 @@
                 <button class="btn" onclick="login()">Login</button>
                 <p style="text-align:center; font-size:0.8rem; cursor:pointer; color:var(--blue);" onclick="toggleAuth()">New here? Register Account</p>
             </div>
+            <p style="text-align:center; margin-top:20px; font-size:0.8rem; color:var(--slate);">
+                Want to earn extra? <span onclick="openDriverReg()" style="color:var(--amber); cursor:pointer; font-weight:bold; text-decoration:underline;">Register as Driver</span>
+            </p>
         </div>
 
         <div id="registerArea" style="display: none;">
@@ -117,7 +120,6 @@
                         <input type="date" id="bookDate" class="input-field">
                         <input type="time" id="bookTime" class="input-field">
                     </div>
-                    
                     <label>From:</label>
                     <select id="bookPick" class="input-field" onchange="toggleOther('bookPick')">
                         <option value="UiTM">UiTM</option><option value="US Sentral">US Sentral</option><option value="OS Sentral">OS Sentral</option><option value="KTM/Stesen Bas">KTM/Stesen Bas</option><option value="Others">Others</option>
@@ -137,35 +139,30 @@
         </div>
     </div>
 
-    <div id="infoModal">
-        <div class="modal-content">
-            <h3 style="color:var(--amber);">Driver Information</h3>
-            <div class="info-row"><span>Name</span><b id="mdName"></b></div>
-            <div class="info-row"><span>Driver ID</span><b id="mdID"></b></div>
-            <div class="info-row"><span>Car</span><b id="mdCar"></b></div>
-            <div style="margin: 20px 0;"><span style="font-size:0.8rem; color:var(--slate);">PLATE NO</span><br><div class="plate-box" id="mdPlate"></div></div>
-            <button class="btn" onclick="document.getElementById('infoModal').style.display='none'">CLOSE</button>
+    <div id="driverRegOverlay">
+        <h2 style="text-align:center; color:var(--amber);">Driver Application</h2>
+        <div class="card">
+            <label>Full Name</label>
+            <input type="text" id="dRegName" class="input-field" placeholder="Nama Penuh">
+            <label>Student ID (For Username)</label>
+            <input type="text" id="dRegUser" class="input-field" placeholder="E.g. 2023123456">
+            <label>Password</label>
+            <input type="password" id="dRegPass" class="input-field" placeholder="Min 6 characters">
+            <label>Car Model & Color</label>
+            <input type="text" id="dRegCar" class="input-field" placeholder="E.g. Myvi Putih">
+            <label>Car Plate Number</label>
+            <input type="text" id="dRegPlate" class="input-field" placeholder="ABC 1234">
+            <label>WhatsApp Number</label>
+            <input type="text" id="dRegPhone" class="input-field" placeholder="0123456789">
+            
+            <button class="btn" style="background:var(--amber); color:black;" onclick="submitDriverApp()">SUBMIT APPLICATION</button>
+            <button class="btn" style="background:transparent; color:var(--red); border:1px solid var(--red);" onclick="closeDriverReg()">CANCEL</button>
         </div>
     </div>
 
-    <div id="chatPanel">
-        <div style="background: var(--blue); padding: 20px; display: flex; align-items: center; color: white;">
-            <button onclick="closeChat()" style="background:none; border:none; color:white; font-size:1.5rem;">←</button>
-            <b style="margin-left:15px;" id="chatWith">Driver</b>
-        </div>
-        <div id="chatMessages"></div>
-        <div style="padding:15px; display:flex; gap:10px; background:var(--card);">
-            <input type="text" id="chatInput" class="input-field" style="margin:0" placeholder="Type..."><button class="btn" style="width:80px; margin:0;" onclick="sendChatMsg()">Send</button>
-        </div>
-    </div>
-
-    <div id="ratingModal">
-        <div class="card" style="text-align: center; width: 85%;">
-            <h2>Trip Completed!</h2>
-            <select id="rateValue" class="input-field"><option value="5">⭐⭐⭐⭐⭐</option><option value="4">⭐⭐⭐⭐</option></select>
-            <input type="text" id="rateFeedback" class="input-field" placeholder="Feedback..."><button class="btn" onclick="submitRating()">Submit</button>
-        </div>
-    </div>
+    <div id="infoModal"><div class="modal-content"><h3 style="color:var(--amber);">Driver Info</h3><div class="info-row"><span>Name</span><b id="mdName"></b></div><div class="info-row"><span>ID</span><b id="mdID"></b></div><div class="info-row"><span>Car</span><b id="mdCar"></b></div><div style="margin:20px 0;"><span style="font-size:0.8rem; color:var(--slate);">PLATE</span><br><div class="plate-box" id="mdPlate"></div></div><button class="btn" onclick="document.getElementById('infoModal').style.display='none'">CLOSE</button></div></div>
+    <div id="chatPanel"><div style="background:var(--blue); padding:20px; display:flex; align-items:center; color:white;"><button onclick="closeChat()" style="background:none; border:none; color:white; font-size:1.5rem;">←</button><b style="margin-left:15px;" id="chatWith">Driver</b></div><div id="chatMessages"></div><div style="padding:15px; display:flex; gap:10px; background:var(--card);"><input type="text" id="chatInput" class="input-field" style="margin:0" placeholder="Type..."><button class="btn" style="width:80px; margin:0;" onclick="sendChatMsg()">Send</button></div></div>
+    <div id="ratingModal"><div class="card" style="text-align: center; width: 85%;"><h2>Trip Completed!</h2><select id="rateValue" class="input-field"><option value="5">⭐⭐⭐⭐⭐</option><option value="4">⭐⭐⭐⭐</option></select><input type="text" id="rateFeedback" class="input-field" placeholder="Feedback..."><button class="btn" onclick="submitRating()">Submit</button></div></div>
 
     <script>
         const firebaseConfig = { apiKey: "AIzaSyCU3QzjiDpL4U3825XtERth6PFlJ1tsZtg", databaseURL: "https://carpool-uitm-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "carpool-uitm" };
@@ -185,7 +182,7 @@
             loadMyBookings();
         }
 
-        // --- AUTH LOGIC ---
+        // --- AUTH & REGISTRATION ---
         function toggleAuth() {
             const login = document.getElementById('loginArea');
             const register = document.getElementById('registerArea');
@@ -195,15 +192,11 @@
 
         async function register() {
             const id = document.getElementById('regID').value.trim();
-            // LENGKAP: PAKSA .toUpperCase() UNTUK DATABASE
             const name = document.getElementById('regName').value.trim().toUpperCase();
             const phone = document.getElementById('regPhone').value.trim();
-
             if(id.length < 5 || name.length < 3) return alert("Please fill all details correctly!");
-
             const check = await db.ref('students/' + id).get();
             if(check.exists()) return alert("This ID is already registered!");
-
             await db.ref('students/' + id).set({ name: name, phone: phone });
             alert("Registration Successful! Now you can Login.");
             toggleAuth();
@@ -212,18 +205,35 @@
         async function login() {
             const id = document.getElementById('stuID').value.trim();
             if(!id) return alert("Enter Student ID");
-
             const snap = await db.ref('students/' + id).get();
             if(snap.exists()) {
                 const data = snap.val();
                 localStorage.setItem('sego_user', JSON.stringify({id: id, name: data.name}));
                 location.reload();
-            } else {
-                alert("ID not found. Please register first!");
-            }
+            } else { alert("ID not found. Please register first!"); }
         }
 
-        // --- CORE FUNCTIONS (REMAINING THE SAME) ---
+        // --- DRIVER REGISTRATION LOGIC ---
+        function openDriverReg() { document.getElementById('driverRegOverlay').style.display = 'flex'; }
+        function closeDriverReg() { document.getElementById('driverRegOverlay').style.display = 'none'; }
+        async function submitDriverApp() {
+            const name = document.getElementById('dRegName').value.trim().toUpperCase();
+            const user = document.getElementById('dRegUser').value.trim();
+            const pass = document.getElementById('dRegPass').value.trim();
+            const car = document.getElementById('dRegCar').value.trim();
+            const plate = document.getElementById('dRegPlate').value.trim().toUpperCase();
+            const phone = document.getElementById('dRegPhone').value.trim();
+
+            if(!name || !user || pass.length < 6 || !car || !plate || !phone) return alert("Sila isi semua maklumat dengan betul (Password min 6 char)!");
+
+            await db.ref('driver_pending/' + user).set({
+                name: name, username: user, password: pass, car: car, plate: plate, phone: phone, appliedAt: Date.now()
+            });
+            alert("Application Sent! Sila tunggu admin hubungi anda untuk pengesahan.");
+            closeDriverReg();
+        }
+
+        // --- CORE FUNCTIONS ---
         function setPax(n) { selectedPax = n; document.querySelectorAll('.pax-btn').forEach(b => b.classList.remove('active')); document.getElementById('pax'+n).classList.add('active'); }
         function logout() { localStorage.clear(); location.reload(); }
         function showTab(t) { document.getElementById('sectionInstant').style.display = t === 'instant' ? 'block' : 'none'; document.getElementById('sectionBooking').style.display = t === 'booking' ? 'block' : 'none'; document.getElementById('btnInstant').classList.toggle('active', t === 'instant'); document.getElementById('btnBooking').classList.toggle('active', t === 'booking'); }
